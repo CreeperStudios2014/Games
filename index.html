@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Lemon Clicker (Photoreal) — Single File</title>
+  <style>
+  /* Embedded style.css — readable, responsive styles */
+  :root{
+    --accent:#f6b93b;
+    --bg:#0f1720;
+    --card:#ffffff;
+    --glass: rgba(255,255,255,0.06);
+  }
+  *{box-sizing:border-box}
+  html,body,#game{height:100%;}
+  body{
+    margin:0;font-family:Inter,ui-sans-serif,system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background:linear-gradient(180deg,#071018 0%, #0f2430 100%);
+    color:#e6eef6; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+  }
+  #game{display:flex;flex-direction:column;min-height:100vh}
+  header{display:flex;justify-content:space-between;align-items:center;padding:16px 24px}
+  header h1{margin:0;font-size:20px;letter-spacing:0.6px}
+  .controls button{margin-left:8px;padding:8px 12px;border-radius:8px;border:none;background:var(--glass);color:inherit;cursor:pointer}
+  .controls .accent{background:linear-gradient(90deg,var(--accent),#ffda76);color:#081018}
+  main{display:flex;flex:1;gap:16px;padding:16px}
+  #play-area{flex:2;position:relative;display:flex;align-items:center;justify-content:center}
+  #background-layer{position:absolute;inset:0;background:radial-gradient(circle at 20% 20%, rgba(255,255,255,0.03), transparent 10%), url('') center/cover no-repeat;filter:blur(8px);opacity:0.35}
+  #lemon-card{position:relative;width:min(640px,90%);height:min(480px,60vh);display:flex;align-items:center;justify-content:center}
+  #lemon-card img{width:100%;height:100%;object-fit:cover;border-radius:16px;box-shadow:0 8px 30px rgba(2,8,23,0.7)}
+  #lemonOverlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  #clicker{font-size:48px;padding:20px;border-radius:120px;border:none;background:linear-gradient(180deg,rgba(255,255,255,0.92),rgba(255,255,255,0.8));cursor:pointer;box-shadow:0 10px 30px rgba(2,8,23,0.6)}
+  #perClick{margin-top:8px;font-weight:700;color:var(--bg);background:linear-gradient(90deg,var(--accent),#ffd27a);padding:6px 10px;border-radius:8px}
+  #sidebar{flex:1;max-width:360px;display:flex;flex-direction:column;gap:12px}
+  .stat{background:var(--glass);padding:10px;border-radius:10px}
+  .panel{background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.02));padding:12px;border-radius:10px}
+  .panel.small{display:flex;gap:8px}
+  #shop .item,#investors .inv{display:flex;justify-content:space-between;padding:8px;margin-bottom:8px;border-radius:8px;background:rgba(0,0,0,0.15)}
+  button.buy,button.inv-btn{background:var(--accent);border:none;padding:6px 10px;border-radius:8px;cursor:pointer}
+  footer{padding:12px;text-align:center;opacity:0.8}
+  .credits small{opacity:0.8}
+  @media(max-width:900px){main{flex-direction:column}#sidebar{max-width:none}}
+  </style>
+</head>
+<body>
+  <div id="game">
+    <header>
+      <h1>Lemon Clicker</h1>
+      <div class="controls">
+        <button id="muteBtn" aria-label="Mute audio">🔊</button>
+        <button id="ascendBtn" class="accent">Ascend</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="play-area">
+        <div id="background-layer"></div>
+        <div id="lemon-card">
+          <img id="lemonImg" alt="Photorealistic lemon">
+          <div id="lemonOverlay">
+            <button id="clicker" aria-label="Click the lemon">🍋</button>
+            <div id="perClick">+0</div>
+          </div>
+        </div>
+      </section>
+
+      <aside id="sidebar">
+        <div class="stat">Lemons: <span id="lemons">0</span></div>
+        <div class="stat">Lemons / sec: <span id="lps">0</span></div>
+        <div class="stat">Evolution: <span id="evolution">1</span></div>
+        <div class="stat">Prestige: <span id="prestige">0</span></div>
+
+        <div class="panel">
+          <h3>Shop</h3>
+          <div id="shop"></div>
+        </div>
+
+        <div class="panel">
+          <h3>Investors</h3>
+          <div id="investors"></div>
+        </div>
+
+        <div class="panel small">
+          <h4>Save / Load</h4>
+          <button id="saveBtn">Save Now</button>
+          <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="panel credits">
+          <small>Images: Unsplash (loaded at runtime) • Music: SoundHelix & SoundJay (runtime)</small>
+        </div>
+      </aside>
+    </main>
+
+    <footer>
+      <small>Photoreal Lemon Clicker — Evolution • Investors • Ascensions</small>
+    </footer>
+  </div>
+
+  <script>
+  // Single-file main.js + config embedded
+  const STORAGE_KEY = 'lemon_clicker_v1';
+
+  const CONFIG = {
+    shop: [
+      { id: 'click_upgrade', name: 'Better Squeeze', baseCost: 15, type: 'click', power: 1 },
+      { id: 'juicer', name: 'Juicer (passive)', baseCost: 60, type: 'generator', power: 1 }
+    ],
+    investors: [
+      { id: 'angel', name: 'Angel Investor', baseCost: 500, multiplier: 1.5, duration: 0, permanent: true },
+      { id: 'vc', name: 'Venture Capital', baseCost: 2000, multiplier: 2.5, duration: 60000, permanent: false }
+    ],
+    evolution: { baseRequirement: 1000, multiplier: 10 },
+    ascension: { prestigePerAscend: 1 }
+  };
+
+  const qs = selector => document.querySelector(selector);
+  let state = {
+    lemons: 0,
+    lps: 0,
+    perClick: 1,
+    evolution: 1,
+    prestige: 0,
+    shop: {},
+    investors: {},
+    lastTick: Date.now(),
+    audioMuted: false
+  };
+
+  let assets = {
+    bgMusic: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+    clickSfx: 'https://www.soundjay.com/button/sounds/button-16.mp3',
+    buySfx: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3'
+  };
+
+  function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  function load(){ const raw = localStorage.getItem(STORAGE_KEY); if(raw){ try{ state = Object.assign(state, JSON.parse(raw)); }catch(e){console.warn('Load failed',e);} } }
+  function format(n){ return Math.floor(n).toLocaleString(); }
+
+  function uiUpdate(){
+    qs('#lemons').textContent = format(state.lemons);
+    qs('#lps').textContent = (state.lps).toFixed(1);
+    qs('#perClick').textContent = `+${state.perClick}`;
+    qs('#evolution').textContent = state.evolution;
+    qs('#prestige').textContent = state.prestige;
+  }
+
+  function buildShop(){
+    const shopEl = qs('#shop'); shopEl.innerHTML = '';
+    CONFIG.shop.forEach(item =>{
+      const owned = state.shop[item.id]||0;
+      const cost = Math.ceil(item.baseCost * Math.pow(1.15, owned));
+      const div = document.createElement('div'); div.className='item';
+      div.innerHTML = `<div><strong>${item.name}</strong><div class="muted">Owned: ${owned}</div></div><div><div>${cost}</div><button class="buy">Buy</button></div>`;
+      div.querySelector('button').addEventListener('click', ()=>{
+        if(state.lemons >= cost){
+          state.lemons -= cost; state.shop[item.id] = owned+1;
+          if(item.type==='click') state.perClick += item.power;
+          if(item.type==='generator') state.lps += item.power;
+          playSfx(assets.buySfx);
+          buildShop(); uiUpdate(); save();
+        } else flash('#lemons');
+      });
+      shopEl.appendChild(div);
+    })
+  }
+
+  function buildInvestors(){
+    const invEl = qs('#investors'); invEl.innerHTML = '';
+    CONFIG.investors.forEach(inv=>{
+      const owned = state.investors[inv.id]||0;
+      const cost = Math.ceil(inv.baseCost * Math.pow(1.25, owned));
+      const div = document.createElement('div'); div.className='inv';
+      div.innerHTML = `<div><strong>${inv.name}</strong><div class="muted">Owned: ${owned}</div></div><div><div>${cost}</div><button class="inv-btn">Buy</button></div>`;
+      div.querySelector('button').addEventListener('click', ()=>{
+        if(state.lemons >= cost){
+          state.lemons -= cost; state.investors[inv.id] = owned+1;
+          if(inv.permanent){ state.perClick *= inv.multiplier; state.lps *= inv.multiplier; }
+          else { applyTemporaryMultiplier(inv.multiplier, inv.duration); }
+          playSfx(assets.buySfx);
+          buildInvestors(); uiUpdate(); save();
+        } else flash('#lemons');
+      });
+      invEl.appendChild(div);
+    })
+  }
+
+  function applyTemporaryMultiplier(mult, durationMs){
+    state.perClick *= mult; state.lps *= mult;
+    setTimeout(()=>{ state.perClick /= mult; state.lps /= mult; uiUpdate(); save(); }, durationMs);
+  }
+
+  function tick(){
+    const now = Date.now(); const dt = (now - state.lastTick)/1000; state.lastTick = now;
+    state.lemons += state.lps * dt;
+    const evoReq = CONFIG.evolution.baseRequirement * Math.pow(CONFIG.evolution.multiplier, state.evolution-1);
+    if(state.lemons >= evoReq){
+      state.lemons -= evoReq; state.evolution += 1;
+      state.perClick *= 1.5; state.lps *= 1.25;
+      flash('#lemon-card');
+    }
+    uiUpdate();
+  }
+
+  function startLoop(){ state.lastTick = Date.now(); setInterval(tick, 500); }
+
+  function hookUI(){
+    qs('#clicker').addEventListener('click', ()=>{ state.lemons += state.perClick; uiUpdate(); playSfx(assets.clickSfx); save(); });
+    qs('#saveBtn').addEventListener('click', ()=>{ save(); pulse('#saveBtn'); });
+    qs('#resetBtn').addEventListener('click', ()=>{ if(confirm('Reset all progress?')){localStorage.removeItem(STORAGE_KEY); location.reload();}});
+    qs('#muteBtn').addEventListener('click', toggleMute);
+    qs('#ascendBtn').addEventListener('click', ()=>{ if(confirm('Ascend: reset progress for prestige?')) ascend(); });
+  }
+
+  function ascend(){
+    const gained = Math.max(0, Math.floor((state.evolution-1) / 3));
+    if(gained<=0){ alert('You need more evolutions to gain prestige'); return; }
+    state.prestige += gained;
+    const preserve = {prestige: state.prestige};
+    state = Object.assign({lemons:0,lps:0,perClick:1,evolution:1,prestige:0,shop:{},investors:{},lastTick:Date.now(),audioMuted:false}, preserve);
+    load(); playSfx(assets.buySfx); uiUpdate(); buildShop(); buildInvestors(); save();
+  }
+
+  function toggleMute(){ state.audioMuted = !state.audioMuted; if(state.audioMuted){ audio && audio.pause(); qs('#muteBtn').textContent='🔇'; } else { audio && audio.play(); qs('#muteBtn').textContent='🔊'; } save(); }
+
+  function flash(selector){ const el = typeof selector === 'string' ? qs(selector) : selector; if(!el) return; el.animate([{transform:'scale(1)'},{transform:'scale(1.02)'},{transform:'scale(1)'}],{duration:400}); }
+  function pulse(selector){const el=qs(selector); if(!el) return; el.animate([{opacity:1},{opacity:0.6},{opacity:1}],{duration:400});}
+
+  let audio = null;
+  function setupAudio(){ try{ audio = new Audio(assets.bgMusic); audio.loop = true; audio.volume = 0.15; if(!state.audioMuted) audio.play().catch(()=>{}); }catch(e){console.warn('Audio failed',e)} }
+  function playSfx(url){ if(state.audioMuted) return; try{ const s = new Audio(url); s.volume=0.6; s.play().catch(()=>{});}catch(e){} }
+
+  async function init(){
+    // config already embedded
+    load();
+    CONFIG.shop.forEach(it=>{ if(!(it.id in state.shop)) state.shop[it.id]=0 });
+    CONFIG.investors.forEach(it=>{ if(!(it.id in state.investors)) state.investors[it.id]=0 });
+
+    // photoreal images from Unsplash at runtime
+    const lemonQuery = 'lemon';
+    const bgQuery = 'wood table lemon';
+    const lemonUrl = `https://source.unsplash.com/1600x900/?${encodeURIComponent(lemonQuery)}`;
+    const bgUrl = `https://source.unsplash.com/1600x900/?${encodeURIComponent(bgQuery)}`;
+    qs('#lemonImg').src = lemonUrl;
+    qs('#background-layer').style.backgroundImage = `url('${bgUrl}')`;
+
+    buildShop(); buildInvestors(); hookUI(); uiUpdate(); setupAudio(); startLoop();
+  }
+
+  init();
+  </script>
+</body>
+</html>
