@@ -3,317 +3,204 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Lemon Clicker (Photoreal) — Single File</title>
+  <title>Lemon Clicker — Compact</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-  /* Improved embedded CSS: cleaner layout, better spacing, loading states + button shadows */
-  :root{
-    --accent:#f6b93b;
-    --bg:#081218;
-    --card:#0f1720;
-    --muted:rgba(230,238,246,0.8);
-    --glass: rgba(255,255,255,0.04);
-    --surface: rgba(255,255,255,0.02);
-    --btn-shadow: 0 10px 30px rgba(2,8,23,0.45);
-    --btn-shadow-strong: 0 18px 40px rgba(2,8,23,0.6);
-  }
-  *{box-sizing:border-box}
-  html,body,#game{height:100%;}
-  body{
-    margin:0;font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
-    background:linear-gradient(180deg,#06121a 0%, #08313c 100%);
-    color:var(--muted); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-  }
-
-  /* App shell */
-  #game{display:flex;flex-direction:column;min-height:100vh}
-  header{display:flex;align-items:center;justify-content:space-between;padding:18px 28px}
-  header h1{margin:0;font-size:20px;color:#fff;font-weight:700}
-  .controls{display:flex;gap:10px}
-  .controls button{padding:8px 12px;border-radius:10px;border:none;background:var(--glass);color:var(--muted);cursor:pointer;box-shadow:var(--btn-shadow);transition:transform 120ms ease, box-shadow 120ms ease}
-  .controls button:hover{transform:translateY(-3px);box-shadow:var(--btn-shadow-strong)}
-  .controls button:active{transform:translateY(0);box-shadow:0 6px 18px rgba(2,8,23,0.35)}
-  .controls .accent{background:linear-gradient(90deg,var(--accent),#ffd676);color:#072022;font-weight:600}
-
-  main{display:grid;grid-template-columns:1fr 360px;gap:20px;padding:18px}
-  @media(max-width:980px){main{grid-template-columns:1fr;align-items:start}}
-
-  /* Play area */
-  #play-area{position:relative;display:flex;align-items:center;justify-content:center;padding:24px}
-  #background-layer{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.25),rgba(0,0,0,0.45));filter:blur(6px);opacity:0.9;z-index:0}
-
-  #lemon-card{position:relative;width:min(680px,92%);height:min(520px,62vh);border-radius:18px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,0.6);z-index:1;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01))}
-  #lemon-card img{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.02);filter:brightness(0.98);}
-
-  /* overlay on top of the image */
-  #lemonOverlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px;z-index:3;pointer-events:auto}
-  #clicker{font-size:46px;padding:22px;border-radius:999px;border:none;background:linear-gradient(180deg,#ffffff,#fff7e6);cursor:pointer;box-shadow:0 12px 30px rgba(2,8,23,0.6);width:110px;height:110px;display:flex;align-items:center;justify-content:center;transition:transform 120ms ease, box-shadow 120ms ease}
-  #clicker:hover{transform:translateY(-4px);box-shadow:var(--btn-shadow-strong)}
-  #clicker:active{transform:translateY(0);box-shadow:0 6px 18px rgba(2,8,23,0.35)}
-  #perClick{margin-top:6px;font-weight:700;color:var(--bg);background:linear-gradient(90deg,var(--accent),#ffd27a);padding:6px 12px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.25)}
-
-  /* Standard button styles (shop/save/reset) */
-  button.buy,button.inv-btn,#saveBtn,#resetBtn{background:var(--accent);border:none;padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:600;box-shadow:var(--btn-shadow);transition:transform 120ms ease, box-shadow 120ms ease}
-  button.buy:hover,button.inv-btn:hover,#saveBtn:hover,#resetBtn:hover{transform:translateY(-3px);box-shadow:var(--btn-shadow-strong)}
-  button.buy:active,button.inv-btn:active,#saveBtn:active,#resetBtn:active{transform:translateY(0);box-shadow:0 6px 18px rgba(2,8,23,0.35)}
-
-  /* loading state */
-  .loading::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.15));backdrop-filter:blur(2px);}
-
-  /* Sidebar */
-  #sidebar{display:flex;flex-direction:column;gap:12px}
-  .stat{background:var(--surface);padding:12px;border-radius:12px;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
-  .stat strong{color:#fff}
-
-  .panel{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:12px;border-radius:12px}
-  .panel h3{margin:0 0 8px 0;color:#fff}
-  #shop .item,#investors .inv{display:flex;justify-content:space-between;padding:8px;margin-bottom:8px;border-radius:8px;background:rgba(0,0,0,0.15);align-items:center}
-  .muted{font-size:12px;color:var(--muted)}
-
-  /* footer */
-  footer{padding:12px;text-align:center;font-size:13px;opacity:0.9}
-
-  /* small helpers */
-  .center{display:flex;align-items:center;gap:8px}
+  :root{--accent:#f6b93b;--bg:#081218;--muted:rgba(230,238,246,0.9);--surface: rgba(255,255,255,0.02);--btn-shadow:0 10px 28px rgba(2,8,23,0.45);--btn-shadow-strong:0 16px 36px rgba(2,8,23,0.6);}*{box-sizing:border-box}html,body,#game{height:100%}body{margin:0;font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:linear-gradient(180deg,#06121a,#08313c);color:var(--muted);}#game{display:flex;flex-direction:column;min-height:100vh}header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}header h1{margin:0;font-size:18px;color:#fff}.controls{display:flex;gap:8px}.controls button{padding:6px 10px;border-radius:8px;border:none;background:var(--surface);color:var(--muted);cursor:pointer;box-shadow:var(--btn-shadow);transition:transform .12s,box-shadow .12s}.controls button:hover{transform:translateY(-3px);box-shadow:var(--btn-shadow-strong)}.controls .accent{background:linear-gradient(90deg,var(--accent),#ffd676);color:#072022}main{display:grid;grid-template-columns:1fr 360px;gap:12px;padding:12px}@media(max-width:900px){main{grid-template-columns:1fr}}#play-area{position:relative;display:flex;align-items:center;justify-content:center;padding:12px}#lemon-card{position:relative;width:min(600px,94%);height:min(380px,54vh);border-radius:12px;overflow:hidden;box-shadow:0 14px 36px rgba(0,0,0,0.6);background:var(--surface)}#lemon-card img{width:100%;height:100%;object-fit:cover;display:block}#lemonOverlay{position:absolute;inset:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;pointer-events:auto}#clicker{font-size:36px;padding:14px;border-radius:999px;border:none;background:linear-gradient(#fff,#fff7e6);cursor:pointer;box-shadow:var(--btn-shadow);width:92px;height:92px;transition:transform .12s,box-shadow .12s;position:relative}#clicker:hover{transform:translateY(-5px);box-shadow:var(--btn-shadow-strong)}#clicker::after{content:'';position:absolute;left:-40%;top:0;width:0;height:100%;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,0.14),rgba(255,255,255,0));transform:skewX(-20deg);transition:width .34s}#clicker:hover::after{width:160%}#perClick{font-weight:700;background:linear-gradient(90deg,var(--accent),#ffd27a);padding:6px 10px;border-radius:10px;color:#081218}.stat{background:var(--surface);padding:8px;border-radius:10px;display:flex;justify-content:space-between;align-items:center}.panel{background:var(--surface);padding:8px;border-radius:10px}#upgradesRoot,#shop,#buildings,#investors{display:flex;flex-direction:column;gap:8px;max-height:260px;overflow:auto}.item,.bld,.inv{display:flex;justify-content:space-between;align-items:center;padding:6px;border-radius:8px;background:rgba(0,0,0,0.12)}button.buy,button.inv-btn,button.hire,button.collect{background:var(--accent);border:none;padding:6px 8px;border-radius:8px;cursor:pointer;box-shadow:var(--btn-shadow)}button.buy:hover,button.inv-btn:hover,button.hire:hover,button.collect:hover{transform:translateY(-3px);box-shadow:var(--btn-shadow-strong)}.small{font-size:12px;color:var(--muted)}footer{padding:8px;text-align:center;font-size:12px;color:var(--muted)}details{background:rgba(255,255,255,0.02);border-radius:8px;padding:6px}summary{cursor:pointer}
   </style>
 </head>
 <body>
   <div id="game">
     <header>
-      <h1>Lemon Clicker</h1>
+      <h1>Lemon Clicker — Compact</h1>
       <div class="controls">
-        <button id="muteBtn" aria-label="Mute audio">🔊</button>
-        <button id="ascendBtn" class="accent">Ascend</button>
+        <button id="muteBtn">🔊</button>
+        <button id="evolveBtn" class="accent">Evolve</button>
+        <button id="rebirthBtn">Rebirth</button>
       </div>
     </header>
 
     <main>
       <section id="play-area">
-        <div id="background-layer"></div>
-        <div id="lemon-card" class="loading">
+        <div id="lemon-card">
           <img id="lemonImg" alt="Photorealistic lemon">
           <div id="lemonOverlay">
-            <button id="clicker" aria-label="Click the lemon">🍋</button>
+            <button id="clicker">🍋</button>
             <div id="perClick">+0</div>
-            <div class="muted">Click the lemon to squeeze and earn lemons</div>
+            <div class="small">Click to squeeze. Cooldown applies.</div>
           </div>
         </div>
       </section>
 
       <aside id="sidebar">
         <div class="stat"><div>Lemons</div><strong id="lemons">0</strong></div>
-        <div class="stat"><div>Lemons / sec</div><strong id="lps">0</strong></div>
+        <div class="stat"><div>LPS</div><strong id="lps">0</strong></div>
         <div class="stat"><div>Evolution</div><strong id="evolution">1</strong></div>
-        <div class="stat"><div>Prestige</div><strong id="prestige">0</strong></div>
+        <div class="stat"><div>Rebirths</div><strong id="rebirths">0</strong></div>
+        <div class="stat"><div>Investors</div><strong id="investorsCount">0</strong></div>
+        <div class="stat"><div>Next Evo Investors</div><strong id="evoInvReq">0</strong></div>
 
         <div class="panel">
-          <h3>Shop</h3>
-          <div id="shop"></div>
-        </div>
-
-        <div class="panel">
-          <h3>Investors</h3>
-          <div id="investors"></div>
-        </div>
-
-        <div class="panel small">
-          <h4>Save / Load</h4>
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <button id="saveBtn">Save Now</button>
-            <button id="resetBtn">Reset</button>
+          <h4 style="margin:0 0 6px 0">Upgrades</h4>
+          <div id="upgradesRoot">
+            <label class="small">Select Building:</label>
+            <select id="upgradeBuildingSelect"></select>
+            <div id="buildingUpgradesContainer"></div>
+            <hr>
+            <h5 class="small">Global Upgrades</h5>
+            <div id="globalUpgrades"></div>
           </div>
         </div>
 
-        <div class="panel credits">
-          <small>Images: Unsplash (loaded at runtime) • Music: SoundHelix & SoundJay (runtime)</small>
+        <div class="panel">
+          <h4 style="margin:0 0 6px 0">Buildings</h4>
+          <div id="buildings"></div>
+        </div>
+
+        <div class="panel">
+          <h4 style="margin:0 0 6px 0">Investors</h4>
+          <div id="investors"></div>
+          <div class="small">Each investor gives +1% income. Cost scales per investor.</div>
         </div>
       </aside>
     </main>
 
-    <footer>
-      <small style="color:var(--muted)">Photoreal Lemon Clicker — Evolution • Investors • Ascensions</small>
-    </footer>
+    <footer>Base click cooldown: <span id="cooldownDisplay">2000</span> ms • Evolution shortens cooldown by x50</footer>
   </div>
 
   <script>
-  // Improved single-file JS with robust event attachment and debug-safe behavior
   (function(){
-    const STORAGE_KEY = 'lemon_clicker_v1';
-
+    const STORAGE_KEY = 'lemon_clicker_compact_v3';
     const CONFIG = {
-      shop: [
-        { id: 'click_upgrade', name: 'Better Squeeze', baseCost: 15, type: 'click', power: 1 },
-        { id: 'juicer', name: 'Juicer (passive)', baseCost: 60, type: 'generator', power: 1 }
-      ],
-      investors: [
-        { id: 'angel', name: 'Angel Investor', baseCost: 500, multiplier: 1.5, duration: 0, permanent: true },
-        { id: 'vc', name: 'Venture Capital', baseCost: 2000, multiplier: 2.5, duration: 60000, permanent: false }
-      ],
-      evolution: { baseRequirement: 1000, multiplier: 10 },
-      ascension: { prestigePerAscend: 1 }
+      baseClickCooldown: 2000,
+      // first investor cost: 1 quadrillion
+      investorBaseCost: 1e15,
+      // evolution investor requirement scaling
+      evolutionInvestorBase: 5,
+      evolutionInvestorMultiplier: 2,
+      buildings:[
+        {id:'stand', name:'Lemon Stand', baseCost:5e6, baseProd:10000, cooldown:2000},
+        {id:'delivery', name:'Lemon Delivery', baseCost:5e7, baseProd:100000, cooldown:3000},
+        {id:'depot', name:'Lemon Depot', baseCost:5e8, baseProd:800000, cooldown:4000},
+        {id:'trading', name:'Lemon Trading Biz', baseCost:5e9, baseProd:7000000, cooldown:5000},
+        {id:'robotics', name:'Lemon Robotics', baseCost:5e10, baseProd:56000000, cooldown:6000},
+        {id:'labs', name:'Lemon Labs', baseCost:5e11, baseProd:420000000, cooldown:7000},
+        {id:'republic', name:'Lemon Republic', baseCost:5e12, baseProd:3200000000, cooldown:8000},
+        {id:'lemonx', name:'LemonX (Space)', baseCost:5e13, baseProd:25000000000, cooldown:9000}
+      ]
     };
 
-    const qs = s => document.querySelector(s);
-    const qid = id => document.getElementById(id);
-
-    let state = {
-      lemons: 0,
-      lps: 0,
-      perClick: 1,
-      evolution: 1,
-      prestige: 0,
-      shop: {},
-      investors: {},
-      lastTick: Date.now(),
-      audioMuted: false
-    };
-
-    let assets = {
-      bgMusic: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-      clickSfx: 'https://www.soundjay.com/button/sounds/button-16.mp3',
-      buySfx: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3'
-    };
-
-    function save(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){console.warn('Save failed',e)} }
-    function load(){ try{ const raw = localStorage.getItem(STORAGE_KEY); if(raw){ const parsed = JSON.parse(raw); state = Object.assign(state, parsed); } }catch(e){console.warn('Load failed',e)} }
-    function format(n){ return Math.floor(n).toLocaleString(); }
-
-    function uiUpdate(){
-      qid('lemons').textContent = format(Number(state.lemons) || 0);
-      qid('lps').textContent = (Number(state.lps) || 0).toFixed(1);
-      qid('perClick').textContent = `+${Math.floor(Number(state.perClick) || 0)}`;
-      qid('evolution').textContent = state.evolution;
-      qid('prestige').textContent = state.prestige;
-    }
-
-    function buildShop(){
-      const shopEl = qid('shop'); shopEl.innerHTML = '';
-      CONFIG.shop.forEach(item =>{
-        const owned = Number(state.shop[item.id]||0);
-        const cost = Math.max(1, Math.ceil(item.baseCost * Math.pow(1.15, owned)));
-        const div = document.createElement('div'); div.className='item';
-        div.innerHTML = `<div style="min-width:140px"><strong style='color:#fff'>${item.name}</strong><div class="muted">Owned: ${owned}</div></div><div style='text-align:right'><div style='margin-bottom:8px'>${cost}</div><button class="buy">Buy</button></div>`;
-        div.querySelector('button').addEventListener('click', ()=>{
-          if(Number(state.lemons) >= cost){
-            state.lemons = Number(state.lemons) - cost; state.shop[item.id] = owned+1;
-            if(item.type==='click') state.perClick = Number(state.perClick) + item.power;
-            if(item.type==='generator') state.lps = Number(state.lps) + item.power;
-            playSfx(assets.buySfx);
-            buildShop(); uiUpdate(); save();
-          } else flash(qid('lemons'));
-        });
-        shopEl.appendChild(div);
-      })
-    }
-
-    function buildInvestors(){
-      const invEl = qid('investors'); invEl.innerHTML = '';
-      CONFIG.investors.forEach(inv=>{
-        const owned = Number(state.investors[inv.id]||0);
-        const cost = Math.max(1, Math.ceil(inv.baseCost * Math.pow(1.25, owned)));
-        const div = document.createElement('div'); div.className='inv';
-        div.innerHTML = `<div style="min-width:140px"><strong style='color:#fff'>${inv.name}</strong><div class="muted">Owned: ${owned}</div></div><div style='text-align:right'><div style='margin-bottom:8px'>${cost}</div><button class="inv-btn">Buy</button></div>`;
-        div.querySelector('button').addEventListener('click', ()=>{
-          if(Number(state.lemons) >= cost){
-            state.lemons = Number(state.lemons) - cost; state.investors[inv.id] = owned+1;
-            if(inv.permanent){ state.perClick = Number(state.perClick) * inv.multiplier; state.lps = Number(state.lps) * inv.multiplier; }
-            else { applyTemporaryMultiplier(inv.multiplier, inv.duration); }
-            playSfx(assets.buySfx);
-            buildInvestors(); uiUpdate(); save();
-          } else flash(qid('lemons'));
-        });
-        invEl.appendChild(div);
-      })
-    }
-
-    function applyTemporaryMultiplier(mult, durationMs){
-      state.perClick = Number(state.perClick) * mult; state.lps = Number(state.lps) * mult;
-      setTimeout(()=>{ state.perClick = Number(state.perClick) / mult; state.lps = Number(state.lps) / mult; uiUpdate(); save(); }, Math.max(100, durationMs));
-    }
-
-    function tick(){
-      const now = Date.now(); const dt = (now - state.lastTick)/1000; state.lastTick = now;
-      state.lemons = Number(state.lemons) + (Number(state.lps) * dt);
-      const evoReq = CONFIG.evolution.baseRequirement * Math.pow(CONFIG.evolution.multiplier, state.evolution-1);
-      if(Number(state.lemons) >= evoReq){
-        state.lemons = Number(state.lemons) - evoReq; state.evolution = Number(state.evolution) + 1;
-        state.perClick = Number(state.perClick) * 1.5; state.lps = Number(state.lps) * 1.25;
-        flash(qid('lemon-card'));
+    // generate per-building upgrades (30 each)
+    const BUILDING_UPGRADES = {};
+    CONFIG.buildings.forEach((b,i)=>{
+      BUILDING_UPGRADES[b.id]=[];
+      for(let j=1;j<=30;j++){
+        const id = `${b.id}_u${j}`;
+        // use exponent 1.05 so each next upgrade is 1.05x cost of previous
+        const cost = Math.round(b.baseCost * Math.pow(1.05, j) * (1 + i*0.5));
+        const effect = j%3===0 ? {type:'prod',amount:1+ j*0.05 * (i+1)} : j%3===1 ? {type:'cooldown',amount:Math.max(0.4,1 - j*0.01 * (1+i*0.1))} : {type:'mult',amount:1+ j*0.02 * (1+i*0.2)};
+        BUILDING_UPGRADES[b.id].push({id,name:`${b.name} Upgrade ${j}`,cost,effect});
       }
-      uiUpdate();
+    });
+
+    // 15 global upgrades
+    const GLOBAL_UPGRADES = [];
+    for(let g=1; g<=15; g++){
+      // cost grows by ^1.05 per upgrade
+      GLOBAL_UPGRADES.push({id:`G${g}`,name:`Global Upgrade ${g}`,cost:Math.round(1e7*Math.pow(1.05,g)),type:g%3===0?'mult':g%3===1?'click':'gen',power:g%3===0?1.12:(g%3===1?Math.ceil(1+g/2):Math.ceil(2+g/3))});
     }
 
-    function startLoop(){ state.lastTick = Date.now(); setInterval(tick, 500); }
+    // building-specific "global" upgrades (1..N per building increasing with building index)
+    const BUILDING_GLOBALS = {};
+    CONFIG.buildings.forEach((b,i)=>{
+      const count = 3 + i*2; BUILDING_GLOBALS[b.id]=[];
+      for(let k=1;k<=count;k++){
+        const id = `${b.id}_G${k}`;
+        // use 1.05 exponent per step
+        const cost = Math.round(b.baseCost * Math.pow(1.05, k) * (1 + i*0.6));
+        const mult = 1 + 0.05 * (i+1) * k; // farther building and further along -> bigger mult
+        BUILDING_GLOBALS[b.id].push({id,name:`${b.name} Global ${k}`,cost,mult});
+      }
+    });
 
-    function hookUI(){
-      const clicker = qid('clicker');
-      const lemonImg = qid('lemonImg');
-      const overlay = qid('lemonOverlay');
+    const qs = s=>document.querySelector(s), qid=id=>document.getElementById(id);
+    let state = {lemons:0,perClick:1,lps:0,evolution:1,rebirths:0,lastTick:Date.now(),audioMuted:false,buildingsOwned:{},managers:{},buildingLast:{},buildingCooldowns:{},investors:{},upgradesOwned:{},incomeMultiplier:1,lastClick:0};
 
-      // Primary click target: button
-      clicker.addEventListener('click', ()=>{ state.lemons = Number(state.lemons) + Number(state.perClick); uiUpdate(); playSfx(assets.clickSfx); save(); });
-      // Also allow clicking the image/overlay to register a click (makes it more forgiving)
-      [lemonImg, overlay].forEach(el=>{
-        el.addEventListener('click', (e)=>{
-          // if the button itself handled it, ignore double
-          if(e.target === clicker) return;
-          state.lemons = Number(state.lemons) + Number(state.perClick); uiUpdate(); playSfx(assets.clickSfx); save();
-        });
-      });
+    CONFIG.buildings.forEach(b=>{ state.buildingsOwned[b.id]=Boolean(state.buildingsOwned[b.id]); state.managers[b.id]=Boolean(state.managers[b.id]); state.buildingLast[b.id]=Number(state.buildingLast[b.id]||0); state.buildingCooldowns[b.id]=b.cooldown; });
 
-      qid('saveBtn').addEventListener('click', ()=>{ save(); pulse(qid('saveBtn')); });
-      qid('resetBtn').addEventListener('click', ()=>{ if(confirm('Reset all progress?')){ localStorage.removeItem(STORAGE_KEY); location.reload(); }});
-      qid('muteBtn').addEventListener('click', toggleMute);
-      qid('ascendBtn').addEventListener('click', ()=>{ if(confirm('Ascend: reset progress for prestige?')) ascend(); });
+    function save(){ try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); }catch(e){console.warn(e);} }
+    function load(){ try{ const raw=localStorage.getItem(STORAGE_KEY); if(raw) state=Object.assign(state,JSON.parse(raw)); }catch(e){console.warn(e);} }
+
+    function short(n){ if(!isFinite(n)) return String(n); if(n<1000) return Math.floor(n).toString(); const units=['','K','M','B','T','Qa','Qi','Sx']; let u=0; while(n>=1000&&u<units.length-1){ n/=1000; u++; } return n.toFixed(n<10?2:(n<100?1:0))+units[u]; }
+    function sumObj(o){ return Object.values(o||{}).reduce((a,b)=>a+Number(b||0),0); }
+    function investorMultiplier(){ return 1 + 0.01 * (sumObj(state.investors) + state.rebirths); }
+    function totalInvestors(){ return sumObj(state.investors) + state.rebirths; }
+    function nextEvolutionInvestorReq(){ return Math.ceil(CONFIG.evolutionInvestorBase * Math.pow(CONFIG.evolutionInvestorMultiplier, state.evolution-1)); }
+
+    function uiUpdate(){ qid('lemons').textContent=short(state.lemons); qid('lps').textContent=(calcLPS()).toFixed(1); qid('perClick').textContent=`+${(state.perClick*state.incomeMultiplier*investorMultiplier()).toFixed(1)}`; qid('evolution').textContent=state.evolution; qid('rebirths').textContent=state.rebirths; qid('investorsCount').textContent=totalInvestors(); qid('evoInvReq').textContent=nextEvolutionInvestorReq(); qid('cooldownDisplay').textContent=Math.max(30,Math.round(CONFIG.baseClickCooldown/state.incomeMultiplier)); buildBuildingsUI(); renderUpgradeBuildingSelect(); renderGlobalUpgrades(); buildInvestors(); }
+
+    function calcLPS(){ let total=0; CONFIG.buildings.forEach(b=>{ if(state.buildingsOwned[b.id]){ const cd = state.buildingCooldowns[b.id]||b.cooldown; total += b.baseProd * (1000/cd); } }); total *= state.incomeMultiplier * investorMultiplier(); state.lps=total; return total; }
+
+    function buildBuildingsUI(){ const el=qid('buildings'); el.innerHTML=''; CONFIG.buildings.forEach(b=>{ const owned=state.buildingsOwned[b.id]; const cost=Math.ceil(b.baseCost * (owned?1:1.2)); const div=document.createElement('div'); div.className='bld'; div.innerHTML=`<div style='min-width:140px'><strong style='color:#fff'>${b.name}</strong><div class='small'>${owned?'Owned':'Not owned'} • Cooldown: ${Math.round(state.buildingCooldowns[b.id]||b.cooldown)}ms</div></div><div style='text-align:right'><div style='margin-bottom:6px'>${short(cost)}</div><div style='display:flex;gap:6px;justify-content:flex-end'><button class='buy' ${owned?'disabled':''}>${owned?'Owned':'Buy'}</button><button class='collect'>Collect</button><button class='hire'>Mgr</button></div></div>`; const buy=div.querySelector('.buy'), collect=div.querySelector('.collect'), hire=div.querySelector('.hire'); buy.addEventListener('click',()=>{ if(state.lemons>=cost && !owned){ state.lemons-=cost; state.buildingsOwned[b.id]=true; state.buildingCooldowns[b.id]=b.cooldown; save(); uiUpdate(); } else flash(qid('lemons')); }); collect.addEventListener('click',()=>{ if(!state.buildingsOwned[b.id]){ flash(collect); return; } const now=Date.now(); const last=state.buildingLast[b.id]||0; const cd=state.buildingCooldowns[b.id]||b.cooldown; if(now-last<cd){ flash(collect); return; } state.buildingLast[b.id]=now; const produced=b.baseProd; state.lemons = Number(state.lemons) + produced * state.incomeMultiplier * investorMultiplier(); save(); uiUpdate(); }); hire.addEventListener('click',()=>{ const mgrCost=Math.ceil(b.baseCost*10); if(state.managers[b.id]){ state.managers[b.id]=false; save(); uiUpdate(); return; } if(state.lemons>=mgrCost){ state.lemons-=mgrCost; state.managers[b.id]=true; save(); uiUpdate(); } else flash(qid('lemons')); }); el.appendChild(div); }); }
+
+    function renderUpgradeBuildingSelect(){ const sel=qid('upgradeBuildingSelect'); const container=qid('buildingUpgradesContainer'); sel.innerHTML=''; CONFIG.buildings.forEach((b,i)=>{ const opt=document.createElement('option'); opt.value=b.id; opt.textContent=b.name; sel.appendChild(opt); }); if(!sel.value) sel.value=CONFIG.buildings[0].id; sel.onchange = ()=> renderSelectedBuildingUpgrades(); renderSelectedBuildingUpgrades(); }
+
+    function renderSelectedBuildingUpgrades(){ const sel=qid('upgradeBuildingSelect'); const bid=sel.value; const container=qid('buildingUpgradesContainer'); container.innerHTML=''; // specific upgrades
+      const upTitle=document.createElement('h5'); upTitle.className='small'; upTitle.textContent='Specific Upgrades'; container.appendChild(upTitle); const list=document.createElement('div'); list.id='specificList'; BUILDING_UPGRADES[bid].forEach(u=>{ const owned=state.upgradesOwned[u.id]; const div=document.createElement('div'); div.className='item'; div.innerHTML=`<div style='min-width:140px'><strong style='color:#fff'>${u.name}</strong><div class='small'>${u.effect.type==='prod'?'Increase production':u.effect.type==='cooldown'?'Reduce cooldown':'Income multiplier'}</div></div><div style='text-align:right'><div style='margin-bottom:6px'>${short(u.cost)}</div><button class='buy' ${owned?'disabled':''}>${owned?'Owned':'Buy'}</button></div>`; const btn=div.querySelector('button'); btn.addEventListener('click',()=>{ if(owned) return; if(state.lemons>=u.cost){ state.lemons-=u.cost; state.upgradesOwned[u.id]=true; if(u.effect.type==='prod'){ const b=CONFIG.buildings.find(x=>x.id===bid); b.baseProd = Math.round(b.baseProd * u.effect.amount); } else if(u.effect.type==='cooldown'){ state.buildingCooldowns[bid] = Math.max(30, Math.round((state.buildingCooldowns[bid]||CONFIG.buildings.find(x=>x.id===bid).cooldown) * u.effect.amount)); } else if(u.effect.type==='mult'){ state.incomeMultiplier *= u.effect.amount; } save(); uiUpdate(); } else flash(qid('lemons')); }); list.appendChild(div); }); container.appendChild(list);
+
+      // building-specific global upgrades
+      const gTitle=document.createElement('h5'); gTitle.className='small'; gTitle.textContent='Building Global Upgrades'; container.appendChild(gTitle);
+      const glist=document.createElement('div'); glist.id='buildingGlobalList'; BUILDING_GLOBALS[bid].forEach(g=>{ const owned=state.upgradesOwned[g.id]; const div=document.createElement('div'); div.className='item'; div.innerHTML=`<div style='min-width:140px'><strong style='color:#fff'>${g.name}</strong><div class='small'>Income × ${g.mult.toFixed(2)}</div></div><div style='text-align:right'><div style='margin-bottom:6px'>${short(g.cost)}</div><button class='buy' ${owned?'disabled':''}>${owned?'Owned':'Buy'}</button></div>`; const btn=div.querySelector('button'); btn.addEventListener('click',()=>{ if(owned) return; if(state.lemons>=g.cost){ state.lemons-=g.cost; state.upgradesOwned[g.id]=true; state.incomeMultiplier *= g.mult; save(); uiUpdate(); } else flash(qid('lemons')); }); glist.appendChild(div); }); container.appendChild(glist);
     }
 
-    function ascend(){
-      const gained = Math.max(0, Math.floor((Number(state.evolution)-1) / 3));
-      if(gained<=0){ alert('You need more evolutions to gain prestige'); return; }
-      state.prestige = Number(state.prestige) + gained;
-      const preserve = {prestige: state.prestige};
-      state = Object.assign({lemons:0,lps:0,perClick:1,evolution:1,prestige:0,shop:{},investors:{},lastTick:Date.now(),audioMuted:false}, preserve);
-      load(); playSfx(assets.buySfx); uiUpdate(); buildShop(); buildInvestors(); save();
+    function renderGlobalUpgrades(){ const el=qid('globalUpgrades'); el.innerHTML=''; GLOBAL_UPGRADES.forEach(u=>{ const owned=state.upgradesOwned[u.id]; const div=document.createElement('div'); div.className='item'; div.innerHTML=`<div style='min-width:140px'><strong style='color:#fff'>${u.name}</strong><div class='small'>${u.type==='click'?'+click power':u.type==='gen'?'+building output':'income multiplier'}</div></div><div style='text-align:right'><div style='margin-bottom:6px'>${short(u.cost)}</div><button class='buy' ${owned?'disabled':''}>${owned?'Owned':'Buy'}</button></div>`; const btn=div.querySelector('button'); btn.addEventListener('click',()=>{ if(owned) return; if(state.lemons>=u.cost){ state.lemons-=u.cost; state.upgradesOwned[u.id]=true; if(u.type==='click') state.perClick += u.power; else if(u.type==='gen'){ CONFIG.buildings.forEach(b=>{ b.baseProd += u.power; }); } else state.incomeMultiplier *= u.power; save(); uiUpdate(); } else flash(qid('lemons')); }); el.appendChild(div); }); }
+
+    function buildInvestors(){ const el=qid('investors'); el.innerHTML=''; const inv={id:'investor',name:'Investor',base:CONFIG.investorBaseCost}; const cnt=Number(state.investors[inv.id]||0); // cost progression uses 1.01 multiplier per investor
+      const cost=Math.ceil(inv.base * Math.pow(1.01,cnt) / Math.pow(0.9,state.rebirths)); const div=document.createElement('div'); div.className='inv'; div.innerHTML=`<div style='min-width:140px'><strong style='color:#fff'>${inv.name}</strong><div class='small'>Owned: ${cnt}</div></div><div style='text-align:right'><div style='margin-bottom:6px'>${short(cost)}</div><button class='inv-btn'>Buy</button></div>`; div.querySelector('button').addEventListener('click',()=>{ if(state.lemons>=cost){ state.lemons-=cost; state.investors[inv.id]=cnt+1; save(); uiUpdate(); } else flash(qid('lemons')); }); el.appendChild(div); }
+
+    function tick(){ const now=Date.now(); const dt=(now-state.lastTick)/1000; state.lastTick=now; // managers auto-activate
+      CONFIG.buildings.forEach(b=>{ if(state.managers[b.id] && state.buildingsOwned[b.id]){ const last=state.buildingLast[b.id]||0; const cd=state.buildingCooldowns[b.id]||b.cooldown; if(now-last>=cd){ state.buildingLast[b.id]=now; state.lemons = Number(state.lemons) + b.baseProd * state.incomeMultiplier * investorMultiplier(); } } }); uiUpdate(); }
+
+    function handleClick(){ const now=Date.now(); const cd=Math.max(30,Math.round(CONFIG.baseClickCooldown/state.incomeMultiplier)); if(now - state.lastClick < cd){ flash(qid('clicker')); return; } state.lastClick=now; state.lemons = Number(state.lemons) + state.perClick * state.incomeMultiplier * investorMultiplier(); save(); uiUpdate(); }
+
+    function attemptRebirth(){ const req=1e18 * Math.pow(10,Math.max(0,state.rebirths)); if(state.lemons<req){ alert('Not enough lemons to rebirth'); return; } if(!confirm('Rebirth? This will reset buildings/upgrades but KEEP investors.')) return;
+      // During rebirth, buy as many investors as you can afford using current lemons.
+      const invId = 'investor';
+      const base = CONFIG.investorBaseCost; // 1e15
+      let owned = Number(state.investors[invId] || 0);
+      let available = Number(state.lemons) || 0;
+      let bought = 0;
+      // first investor cost based on current owned
+      let cost = Math.ceil(base * Math.pow(1.01, owned));
+      // apply rebirth discount to costs when buying during rebirth? We'll NOT apply rebirth discount here since rebirth is happening now.
+      while(available >= cost){
+        available -= cost;
+        owned += 1;
+        bought += 1;
+        cost = Math.ceil(base * Math.pow(1.01, owned));
+      }
+      if(bought>0){ state.investors[invId] = owned; state.lemons = available; }
+      // complete rebirth reset (keep investors)
+      state.rebirths = Number(state.rebirths) + 1;
+      state.perClick = 1; state.incomeMultiplier = 1; state.upgradesOwned = {};
+      CONFIG.buildings.forEach(b=>{ state.buildingsOwned[b.id]=false; state.managers[b.id]=false; state.buildingLast[b.id]=0; state.buildingCooldowns[b.id]=b.cooldown; });
+      save(); uiUpdate(); if(bought>0) alert(`Rebirth granted ${bought} investors (spent lemons to buy them).`);
     }
 
-    function toggleMute(){ state.audioMuted = !state.audioMuted; if(state.audioMuted){ audio && audio.pause(); qid('muteBtn').textContent='🔇'; } else { audio && audio.play(); qid('muteBtn').textContent='🔊'; } save(); }
+    function attemptEvolve(){
+      const evoReq = 1000 * Math.pow(10, state.evolution-1);
+      const invReq = nextEvolutionInvestorReq();
+      const ownedInv = totalInvestors();
+      if(state.lemons < evoReq){ alert(`Not enough lemons to evolve (need ${short(evoReq)}).`); return; }
+      if(ownedInv < invReq){ alert(`Not enough investors to evolve (need ${invReq} total investors, you have ${ownedInv}).`); return; }
+      if(!confirm('Evolve now? This will multiply income ×50 and reset run progress AND remove investors.')) return; state.evolution = Number(state.evolution)+1; state.incomeMultiplier *= 50; state.lemons=0; state.perClick=1; state.upgradesOwned={}; CONFIG.buildings.forEach(b=>{ state.buildingsOwned[b.id]=false; state.managers[b.id]=false; state.buildingLast[b.id]=0; state.buildingCooldowns[b.id]=b.cooldown; }); state.investors={}; save(); uiUpdate(); }
 
-    function flash(el){ if(!el) return; el.animate([{transform:'scale(1)'},{transform:'scale(1.02)'},{transform:'scale(1)'}],{duration:340}); }
-    function pulse(el){ if(!el) return; el.animate([{opacity:1},{opacity:0.6},{opacity:1}],{duration:400}); }
+    function playSfx(){ if(state.audioMuted) return; try{ const s=new Audio('https://www.soundjay.com/button/sounds/button-16.mp3'); s.volume=0.6; s.play().catch(()=>{}); }catch(e){} }
+    function flash(el){ if(!el) return; el.animate([{transform:'scale(1)'},{transform:'scale(1.04)'},{transform:'scale(1)'}],{duration:260}); }
 
-    let audio = null;
-    function setupAudio(){ try{ audio = new Audio(assets.bgMusic); audio.loop = true; audio.volume = 0.15; if(!state.audioMuted) audio.play().catch(()=>{}); }catch(e){console.warn('Audio failed',e)} }
-    function playSfx(url){ if(state.audioMuted) return; try{ const s = new Audio(url); s.volume=0.6; s.play().catch(()=>{});}catch(e){} }
+    function init(){ load(); CONFIG.buildings.forEach(b=>{ if(!(b.id in state.buildingsOwned)) state.buildingsOwned[b.id]=false; if(!(b.id in state.managers)) state.managers[b.id]=false; if(!(b.id in state.buildingLast)) state.buildingLast[b.id]=0; if(!(b.id in state.buildingCooldowns)) state.buildingCooldowns[b.id]=b.cooldown; }); const img=qid('lemonImg'); img.onerror=()=>{ img.src='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="100%" height="100%" fill="%23081218"/><text x="50%" y="50%" fill="%23fff" font-size="24" text-anchor="middle">Photorealistic lemon</text></svg>'; }; img.src='https://source.unsplash.com/1200x800/?lemon'; qid('clicker').addEventListener('click',handleClick); qid('rebirthBtn').addEventListener('click',attemptRebirth); qid('evolveBtn').addEventListener('click',attemptEvolve); qid('muteBtn').addEventListener('click',()=>{ state.audioMuted=!state.audioMuted; qid('muteBtn').textContent=state.audioMuted?'🔇':'🔊'; save(); }); setInterval(tick,500); uiUpdate(); }
 
-    function removeLoading(){ const card = qid('lemon-card'); if(card) card.classList.remove('loading'); }
-
-    async function init(){
-      load();
-      CONFIG.shop.forEach(it=>{ if(!(it.id in state.shop)) state.shop[it.id]=0 });
-      CONFIG.investors.forEach(it=>{ if(!(it.id in state.investors)) state.investors[it.id]=0 });
-
-      // load photoreal images at runtime (Unsplash random queries)
-      const lemonQuery = 'lemon';
-      const bgQuery = 'lemon wood table';
-      const lemonUrl = `https://source.unsplash.com/1600x900/?${encodeURIComponent(lemonQuery)}`;
-      const bgUrl = `https://source.unsplash.com/1600x900/?${encodeURIComponent(bgQuery)}`;
-
-      const img = qid('lemonImg');
-      img.onload = () => { removeLoading(); };
-      img.onerror = () => { removeLoading(); img.style.objectFit = 'contain'; };
-      img.src = lemonUrl;
-      qid('background-layer').style.backgroundImage = `url('${bgUrl}')`;
-
-      buildShop(); buildInvestors(); hookUI(); uiUpdate(); setupAudio(); startLoop();
-
-      // safety: if elements didn't attach listeners, log
-      setTimeout(()=>{
-        if(!qid('clicker').onclick && !qid('clicker')._hasListener){ console.info('Click handler attached? yes (fallbacks added)'); }
-      },500);
-    }
-
-    // wait for DOM fully parsed
-    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
   })();
   </script>
 </body>
