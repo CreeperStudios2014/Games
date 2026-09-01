@@ -6,14 +6,16 @@
   <title>Lemon Clicker (Photoreal) — Single File</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-  /* Improved embedded CSS: cleaner layout, better spacing, loading states */
+  /* Improved embedded CSS: cleaner layout, better spacing, loading states + button shadows */
   :root{
     --accent:#f6b93b;
     --bg:#081218;
     --card:#0f1720;
-    --muted:rgba(230,238,246,0.7);
+    --muted:rgba(230,238,246,0.8);
     --glass: rgba(255,255,255,0.04);
     --surface: rgba(255,255,255,0.02);
+    --btn-shadow: 0 10px 30px rgba(2,8,23,0.45);
+    --btn-shadow-strong: 0 18px 40px rgba(2,8,23,0.6);
   }
   *{box-sizing:border-box}
   html,body,#game{height:100%;}
@@ -28,7 +30,9 @@
   header{display:flex;align-items:center;justify-content:space-between;padding:18px 28px}
   header h1{margin:0;font-size:20px;color:#fff;font-weight:700}
   .controls{display:flex;gap:10px}
-  .controls button{padding:8px 12px;border-radius:10px;border:none;background:var(--glass);color:var(--muted);cursor:pointer}
+  .controls button{padding:8px 12px;border-radius:10px;border:none;background:var(--glass);color:var(--muted);cursor:pointer;box-shadow:var(--btn-shadow);transition:transform 120ms ease, box-shadow 120ms ease}
+  .controls button:hover{transform:translateY(-3px);box-shadow:var(--btn-shadow-strong)}
+  .controls button:active{transform:translateY(0);box-shadow:0 6px 18px rgba(2,8,23,0.35)}
   .controls .accent{background:linear-gradient(90deg,var(--accent),#ffd676);color:#072022;font-weight:600}
 
   main{display:grid;grid-template-columns:1fr 360px;gap:20px;padding:18px}
@@ -43,8 +47,15 @@
 
   /* overlay on top of the image */
   #lemonOverlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px;z-index:3;pointer-events:auto}
-  #clicker{font-size:46px;padding:22px;border-radius:999px;border:none;background:linear-gradient(180deg,#ffffff,#fff7e6);cursor:pointer;box-shadow:0 12px 30px rgba(2,8,23,0.6);width:110px;height:110px;display:flex;align-items:center;justify-content:center}
-  #perClick{margin-top:6px;font-weight:700;color:var(--bg);background:linear-gradient(90deg,var(--accent),#ffd27a);padding:6px 12px;border-radius:12px}
+  #clicker{font-size:46px;padding:22px;border-radius:999px;border:none;background:linear-gradient(180deg,#ffffff,#fff7e6);cursor:pointer;box-shadow:0 12px 30px rgba(2,8,23,0.6);width:110px;height:110px;display:flex;align-items:center;justify-content:center;transition:transform 120ms ease, box-shadow 120ms ease}
+  #clicker:hover{transform:translateY(-4px);box-shadow:var(--btn-shadow-strong)}
+  #clicker:active{transform:translateY(0);box-shadow:0 6px 18px rgba(2,8,23,0.35)}
+  #perClick{margin-top:6px;font-weight:700;color:var(--bg);background:linear-gradient(90deg,var(--accent),#ffd27a);padding:6px 12px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.25)}
+
+  /* Standard button styles (shop/save/reset) */
+  button.buy,button.inv-btn,#saveBtn,#resetBtn{background:var(--accent);border:none;padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:600;box-shadow:var(--btn-shadow);transition:transform 120ms ease, box-shadow 120ms ease}
+  button.buy:hover,button.inv-btn:hover,#saveBtn:hover,#resetBtn:hover{transform:translateY(-3px);box-shadow:var(--btn-shadow-strong)}
+  button.buy:active,button.inv-btn:active,#saveBtn:active,#resetBtn:active{transform:translateY(0);box-shadow:0 6px 18px rgba(2,8,23,0.35)}
 
   /* loading state */
   .loading::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.15));backdrop-filter:blur(2px);}
@@ -58,7 +69,6 @@
   .panel h3{margin:0 0 8px 0;color:#fff}
   #shop .item,#investors .inv{display:flex;justify-content:space-between;padding:8px;margin-bottom:8px;border-radius:8px;background:rgba(0,0,0,0.15);align-items:center}
   .muted{font-size:12px;color:var(--muted)}
-  button.buy,button.inv-btn{background:var(--accent);border:none;padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:600}
 
   /* footer */
   footer{padding:12px;text-align:center;font-size:13px;opacity:0.9}
