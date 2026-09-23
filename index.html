@@ -15,23 +15,25 @@
     }
     *{box-sizing:border-box;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;}
     html,body{height:100%;margin:0;background:var(--bg);color:var(--muted);}    
-    #game{max-width:1100px;margin:24px auto;padding:18px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));border-radius:14px}
-    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+    #game{max-width:1000px; height: margin:0px auto;padding:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));border-radius:14px}
+    header{justify-content:space-between;align-items:center;margin-bottom:18px}
     h1{margin:0;font-size:20px}
     .controls button{margin-left:8px;padding:8px 10px;border-radius:8px;border:0;background:var(--surface);color:var(--muted);cursor:pointer}
     button.accent{background:var(--accent);color:#081218;font-weight:700;box-shadow:var(--btn-shadow)}
-    main{display:flex;gap:16px}
-    #play-area{flex:1;display:flex;align-items:center;justify-content:center}
+    main{gap:16px}
+    #play-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
     #lemon-card{width:420px;height:260px;background:var(--surface);border-radius:12px;display:flex;align-items:center;justify-content:center;position:relative}
     #lemonImg{position:absolute;inset:0;border-radius:12px;width:100%;height:100%;object-fit:cover;opacity:0.08}
     #lemonOverlay{position:relative;z-index:2;text-align:center}
     #clicker{font-size:40px;padding:18px;border-radius:999px;border:0;background:rgba(255,255,255,0.04);color:var(--muted);cursor:pointer}
     #perClick{margin-top:8px;font-weight:700}
+    #upgradesContainer{display:flex;flex-direction:column;gap:8px;width:420px;margin-top:16px}
+    .upgrade-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface);border-radius:8px}
     aside#sidebar{width:360px}
-    .stat{display:flex;justify-content:space-between;padding:8px 12px;background:transparent;border-radius:8px;margin-bottom:6px}
-    .panel{background:var(--surface);padding:12px;border-radius:10px;margin-bottom:10px}
+    .stat{display:flex;justify-content:space-between;padding:5px 0px;background:transparent;border-radius:20px;margin-bottom:px}
+    .panel{background:var(--surface);padding:25px;border-radius:0px;margin-bottom:0px}
     .small{font-size:12px;color:rgba(230,238,246,0.75)}
-    #shop .row, #investors .row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.02)}
+    #shop .row, #investors .row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom: :1px solid rgba(255,255,255,0.02)}
     .buyBtn{padding:6px 10px;border-radius:8px;border:0;background:var(--accent);color:#081218;cursor:pointer}
     .disabled{opacity:0.5;pointer-events:none}
     footer{margin-top:12px;font-size:12px;color:rgba(230,238,246,0.6)}
@@ -73,9 +75,10 @@
           <div id="lemonOverlay">
             <button id="clicker">🍋</button>
             <div id="perClick">+$0</div>
-            <div class="small">Click to earn money. 1 lemon = $1</div>
+            <div class="small">Click to earn money. Manual collect for buildings available in timers if no manager.</div>
           </div>
         </div>
+        <div id="upgradesContainer"></div>
       </section>
 
       <aside id="sidebar">
@@ -110,7 +113,7 @@
   <!-- Upgrades Full Screen -->
   <div id="upgradesScreen" class="upgrades-screen" role="dialog" aria-modal="true">
     <div class="upgrades-header">
-      <h2 style="margin:0">Upgrades & Managers</h2>
+      <h2 style="margin:0">Upgrades and Managers</h2>
       <div>
         <button id="closeUpgrades" class="buyBtn">Close</button>
       </div>
@@ -153,10 +156,10 @@
         { id: 'republic', name: 'Lemon Republic', baseCost: 75_000_000, type: 'generator', power: 62000, interval: 14, manualPower: 62000, manualCooldown: 1200 },
         // LemonX: extremely expensive (88 sexvigintillion approximated as 8.8e67)
         { id: 'lemonx', name: 'LemonX', baseCost: 8.8e67, type: 'generator', power: 300000, interval: 20, manualPower: 350000, manualCooldown: 1500 },
-        
+
         // global upgrades (one-time)
-        { id: 'click_power', name: 'Upgrade: Click Power', baseCost: 1_200, type: 'upgrade', power: 10, oneTime:true },
-        { id: 'click_speed', name: 'Upgrade: Click Speed', baseCost: 2_000, type: 'upgrade', speedFactor: 0.5, oneTime:true }
+        { id: 'click_power', name: 'Upgrade: Click Power', baseCost: 1_200_000, type: 'upgrade', power: 1000, oneTime:true },
+        { id: 'click_speed', name: 'Upgrade: Click Speed', baseCost: 2_000_000, type: 'upgrade', speedFactor: 0.005, oneTime:true }
       ],
       managers:[
         { id: 'stand_manager', name: 'Stand Manager', baseCost: 2_500, for: 'stand', effect: 'auto', oneTime:true },
@@ -174,11 +177,15 @@
       // per-building one-time upgrades: each has id, name and effect
       buildingUpgrades: {
         stand: [
-          { id:'stand_up1', name:'Upgrade 1', baseCost:500, effect:{power:+2} },
-          { id:'stand_up2', name:'Upgrade 2', baseCost:1200, effect:{intervalFactor:0.8} }
+          { id:'stand_up1', name:'Upgrade 1', baseCost:50, effect:{power:3} },
+          { id:'stand_up2', name:'Upgrade 2', baseCost:120, effect:{intervalFactor:0.8} },
+          {id:'stand_up3', name:'Upgrade 3', baseCost:300, effect:{power:4}},
+          {id:'stand_up4', name:'Upgrade 4', baseCost:1000, effect:{power:4}},
+          {id:'stand_up5', name:'Upgrade 5', baseCost:1000, effect:{power:4}},
+          {id:'stand_up6', name:'Upgrade 6', baseCost:1000, effect:{intervalFactor:0.01}},
         ],
         dash: [
-          { id:'dash_up1', name:'Upgrade 1', baseCost:3000, effect:{power:+8} },
+          { id:'dash_up1', name:'Upgrade 1', baseCost:3000, effect:{power:3} },
           { id:'dash_up2', name:'Upgrade 2', baseCost:7000, effect:{intervalFactor:0.85} }
         ],
         depot: [ { id:'depot_up1', name:'Upgrade 1', baseCost:20_000, effect:{power:+200} } ],
@@ -186,19 +193,19 @@
         labs: [ { id:'labs_up1', name:'Upgrade 1', baseCost:250_000, effect:{power:+5000} } ],
         robotics: [ { id:'robotics_up1', name:'Upgrade 1', baseCost:900_000, effect:{power:+20000} } ],
         republic: [ { id:'republic_up1', name:'Upgrade 1', baseCost:4_000_000, effect:{power:+100000} } ],
-        lemonx: [ { id:'lemonx_up1', name:'Upgrade 1', baseCost:8e66, effect:{power:+1000000} } ]
+        lemonx: [ { id:'lemonx_up1', name:'Upgrade 1', baseCost:8e66, effect:{power:+1_000_000} } ]
       }
     };
 
     const qs = s=>document.querySelector(s), qid = id=>document.getElementById(id);
 
     let state = {
-      money:0,
+      money:1,
       perClick:1,
       clickCooldownMs: CONFIG.baseClickCooldownMs,
       lastClick:0,
-      shop:{},      // for generators and upgrades: owned=0/1
-      managers:{},   // owned=0/1
+      shop:{},        // 0/1 for owned (one-time)
+      managers:{},    // 0/1 for owned
       investors:{},
       buildingsProgress:{},
       buildingsLastCollectMs:{},
@@ -215,7 +222,6 @@
     function formatMoney(n){
       if(!isFinite(n)) return '$0';
       if(n < 1000000) return '$' + Math.floor(n).toLocaleString();
-      // abbreviate large numbers
       const suffixes = ['','K','M','B','T','Qa','Qi','Sx','Sp','Oc','No','Dc'];
       let tier = Math.floor(Math.log10(n)/3);
       if(tier <= 12){
@@ -227,21 +233,66 @@
 
     function investorsMultiplier(){ let m = 1; CONFIG.investors.forEach(inv=>{ const owned = Number(state.investors[inv.id]||0); if(owned>0) m *= Math.pow(inv.multiplier, owned); }); return m; }
 
+    // Only auto (MPS) contributes when a manager is owned for that building.
     function computeMPS(){ let total=0; CONFIG.shop.forEach(it=>{ if(it.type!=='generator') return; const owned = Number(state.shop[it.id]||0); if(!owned) return; const mgr = CONFIG.managers.find(m=>m.for===it.id && (state.managers[m.id] || 0)>0); if(mgr && mgr.effect === 'auto'){ let interval = it.interval/2; total += it.power / interval; } }); return total * investorsMultiplier(); }
 
-    function uiUpdate(){ qid('money').textContent = formatMoney(state.money); qid('mps').textContent = Math.floor(computeMPS()) + '/s'; qid('perClick').textContent = `+$${state.perClick}`; qid('clickCooldownDisplay').textContent = state.clickCooldownMs; qid('evolution').textContent = state.evolution; qid('prestige').textContent = state.prestige; buildShop(); buildInvestors(); buildTimers(); }
+    function uiUpdate(){ qid('money').textContent = formatMoney(state.money); qid('mps').textContent = Math.floor(computeMPS()) + '/s'; qid('perClick').textContent = `+$${state.perClick}`; qid('clickCooldownDisplay').textContent = state.clickCooldownMs; qid('evolution').textContent = state.evolution; qid('prestige').textContent = state.prestige; buildShop(); buildInvestors(); buildTimers(); buildUpgradeRows(); }
 
     function costFor(item){ return item.baseCost; }
     function managerCost(mgr){ return mgr.baseCost; }
 
+    function buildUpgradeRows(){
+      const container = qid('upgradesContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      CONFIG.shop.filter(s => s.type === 'upgrade').forEach(up => {
+        const owned = state.upgradesOwned[up.id];
+        const row = document.createElement('div');
+        row.className = 'upgrade-row';
+
+        const label = document.createElement('div');
+        label.innerHTML = `<div style="font-weight:600">${up.name}</div><div class="small">One-time global upgrade</div>`;
+
+        const btn = document.createElement('button');
+        btn.className = 'buyBtn';
+
+        if (owned) {
+          btn.textContent = 'Owned';
+          btn.classList.add('disabled');
+        } else {
+          btn.textContent = formatMoney(costFor(up));
+          btn.onclick = () => {
+            if (state.money >= up.baseCost) {
+              state.money -= up.baseCost;
+              state.upgradesOwned[up.id] = 1;
+
+              if (up.power) state.perClick += up.power;
+              if (up.speedFactor) {
+                state.clickCooldownMs = Math.max(30, Math.floor(state.clickCooldownMs * up.speedFactor));
+              }
+
+              save();
+              uiUpdate();
+              playSfx();
+            }
+          };
+        }
+
+        row.appendChild(label);
+        row.appendChild(btn);
+        container.appendChild(row);
+      });
+    }
+
     function buildShop(){ const shopEl=qid('shop'); shopEl.innerHTML='';
-      // generators
+      // generators (one-time)
       CONFIG.shop.filter(it=>it.type==='generator').forEach(it=>{
         const owned = Number(state.shop[it.id]||0);
         const cost = costFor(it);
         const row = document.createElement('div'); row.className='row';
         const left = document.createElement('div');
-        left.innerHTML = `<div style="font-weight:600">${it.name}</div><div class="small">Owned: ${owned} • ${it.power}/cycle every ${it.interval}s</div>`;
+        left.innerHTML = `<div style="font-weight:600">${it.name}</div><div class="small">${owned? 'Owned':'One-time purchase'} • ${it.power}/cycle every ${it.interval}s</div>`;
         const right = document.createElement('div');
         const btn = document.createElement('button'); btn.className='buyBtn';
         if(owned){ btn.textContent = 'Owned'; btn.classList.add('disabled'); }
@@ -251,30 +302,99 @@
         }
         right.appendChild(btn); row.appendChild(left); row.appendChild(right); shopEl.appendChild(row);
       });
-
-      // click upgrades
-      const clickPower = CONFIG.shop.find(s=>s.id==='click_power');
-      const cpOwned = Number(state.shop[clickPower.id]||0); const cpCost = costFor(clickPower);
-      const cpRow = document.createElement('div'); cpRow.className='row';
-      cpRow.innerHTML = `<div style="font-weight:600">${clickPower.name}</div><div class="small">Owned: ${cpOwned}</div>`;
-      const cpBtn = document.createElement('button'); cpBtn.className='buyBtn'; cpBtn.textContent = formatMoney(cpCost);
-      cpBtn.onclick = ()=>{ if(state.money >= cpCost){ state.money -= cpCost; state.shop[clickPower.id] = cpOwned + 1; state.perClick += clickPower.power; save(); uiUpdate(); playSfx(); }}; cpRow.appendChild(cpBtn); shopEl.appendChild(cpRow);
-      const clickSpeed = CONFIG.shop.find(s=>s.id==='click_speed');
-      const csOwned = Number(state.shop[clickSpeed.id]||0); const csCost = costFor(clickSpeed);
-      const csRow = document.createElement('div'); csRow.className='row';
-      csRow.innerHTML = `<div style="font-weight:600">${clickSpeed.name}</div><div class="small">Owned: ${csOwned}</div>`;
-      const csBtn = document.createElement('button'); csBtn.className='buyBtn'; csBtn.textContent = formatMoney(csCost);
-      csBtn.onclick = ()=>{ if(state.money >= csCost){ state.money -= csCost; state.shop[clickSpeed.id] = csOwned + 1; state.clickCooldownMs = Math.max(30, Math.floor(state.clickCooldownMs * clickSpeed.speedFactor)); save(); uiUpdate(); playSfx(); }}; csRow.appendChild(csBtn); shopEl.appendChild(csRow);
     }
 
-    function buildInvestors(){ const el=qid('investors'); el.innerHTML=''; CONFIG.investors.forEach(inv=>{ const owned = Number(state.investors[inv.id]||0); const cost = Math.max(1, Math.ceil(inv.baseCost * Math.pow(2, owned))); const row = document.createElement('div'); row.className='row'; row.innerHTML = `<div style="font-weight:600">${inv.name}</div><div class="small">Owned: ${owned}</div>`; const btn = document.createElement('button'); btn.className='buyBtn'; btn.textContent = `${formatMoney(cost)}`; btn.onclick = ()=>{ if(state.money >= cost){ state.money -= cost; state.investors[inv.id] = owned + 1; save(); uiUpdate(); playSfx(); }}; row.appendChild(btn); el.appendChild(row); }); }
+    function buildInvestors(){ const el=qid('investors'); el.innerHTML=''; CONFIG.investors.forEach(inv=>{ const owned = Number(state.investors[inv.id]||0); const cost = inv.baseCost; const row = document.createElement('div'); row.className='row'; row.innerHTML = `<div style="font-weight:600">${inv.name}</div><div class="small">Owned: ${owned}</div>`; const btn = document.createElement('button'); btn.className='buyBtn'; btn.textContent = `${formatMoney(cost)}`; btn.onclick = ()=>{ if(state.money >= cost){ state.money -= cost; state.investors[inv.id] = owned + 1; save(); uiUpdate(); playSfx(); }}; row.appendChild(btn); el.appendChild(row); }); }
 
-    function buildTimers(){ const list = qid('timersList'); list.innerHTML=''; let any=false; CONFIG.shop.forEach(it=>{ if(it.type!=='generator') return; const owned = Number(state.shop[it.id]||0); if(owned<=0) return; const prog = state.buildingsProgress[it.id] || 0; // seconds into current interval
-        const interval = (CONFIG.managers.find(m=>m.for===it.id && (state.managers[m.id]||0)>0) ? it.interval/2 : it.interval);
-        const remaining = Math.max(0, interval - prog).toFixed(1);
-        const row = document.createElement('div'); row.className='row'; row.innerHTML = `<div style="font-weight:600">${it.name}</div><div class="small">Owned: ${owned} • in ${remaining}s</div>`;
-        list.appendChild(row);
-    }); if(!any) list.innerHTML = '<div class="muted">Own a building to see its timer here.</div>';
+    // Show building list; if manager owned then label automated; if not show "Collect" manual button (enforces manual cooldown)
+    function buildTimers(){ const list = qid('timersList'); list.innerHTML=''; let any=false; CONFIG.shop.forEach(it=>{ if(it.type!=='generator') return; const owned = Number(state.shop[it.id]||0); if(!owned) return; any=true; const prog = state.buildingsProgress[it.id] || 0; const mgr = CONFIG.managers.find(m=>m.for===it.id && (state.managers[m.id]||0)>0); const interval = (mgr ? it.interval/2 : it.interval); const remaining = Math.max(0, interval - prog).toFixed(1); const row = document.createElement('div'); row.className='row'; const leftHTML = `<div style="font-weight:600">${it.name}</div><div class="small">Progress: ${prog.toFixed(1)}s / ${interval}s</div>`; row.innerHTML = leftHTML; const right = document.createElement('div'); if(mgr){ const span = document.createElement('div'); span.className='small'; span.textContent = 'Automated'; right.appendChild(span); } else { const colBtn = document.createElement('button'); colBtn.className='buyBtn'; colBtn.textContent = 'Collect'; colBtn.onclick = ()=>{ manualCollect(it.id); }; const last = state.buildingsLastCollectMs[it.id]||0; const ago = Date.now() - last; if(ago < it.manualCooldown) { colBtn.disabled=true; colBtn.classList.add('disabled'); } right.appendChild(colBtn); } row.appendChild(right); list.appendChild(row); }); if(!any) list.innerHTML = '<div class="muted">Own a building to see its timer here.</div>';} 
+
+    function manualCollect(id){ const it = CONFIG.shop.find(s=>s.id===id); if(!it) return; if(!(state.shop[id])) return; const now = Date.now(); const last = state.buildingsLastCollectMs[id]||0; if(now - last < it.manualCooldown){ return; } const prog = state.buildingsProgress[id] || 0; const interval = it.interval; // manual collects only performed by player; give floor(prog/interval) cycles
+      const cycles = Math.floor(prog / interval); if(cycles<=0){ // allow partial manual collect equal to manualPower as fallback
+        // give manualPower once
+        state.money += it.manualPower * investorsMultiplier();
+        state.buildingsLastCollectMs[id] = now;
+        save(); uiUpdate(); playSfx(); return;
+      }
+      const gain = cycles * it.power * investorsMultiplier(); state.money += gain; state.buildingsProgress[id] = prog % interval; state.buildingsLastCollectMs[id] = now; save(); uiUpdate(); playSfx(); }
+
+    function tick(){ const now = Date.now(); const dt = (now - state.lastTick)/1000; state.lastTick = now; CONFIG.shop.forEach(it=>{ if(it.type!=='generator') return; const owned = Number(state.shop[it.id]||0); if(!owned) return; if(!(it.id in state.buildingsProgress)) state.buildingsProgress[it.id]=0; let prog = state.buildingsProgress[it.id] + dt; const mgr = CONFIG.managers.find(m=>m.for===it.id && (state.managers[m.id] || 0)>0); let interval = it.interval; if(mgr && mgr.effect === 'auto') interval = Math.max(0.001, interval/2); if(mgr && mgr.effect === 'auto'){ if(prog >= interval){ const cycles = Math.floor(prog / interval); const baseGain = cycles * it.power; const gain = baseGain * investorsMultiplier(); state.money += gain; prog = prog % interval; } } state.buildingsProgress[it.id] = prog; }); uiUpdate(); }
+
+    /* Upgrades screen behavior */
+    function openUpgrades(){ qid('upgradesScreen').style.display = 'flex'; qid('mainContent').style.display = 'none'; buildUpgrades(); }
+    function closeUpgrades(){ qid('upgradesScreen').style.display = 'none'; qid('mainContent').style.display = 'flex'; }
+
+    function buildUpgrades(){ // managers
+      const list = qid('managersList'); list.innerHTML = '';
+      CONFIG.managers.forEach(m=>{
+        const owned = Number(state.managers[m.id]||0);
+        const cost = managerCost(m);
+        const row = document.createElement('div'); row.className = 'manager-row';
+        const left = document.createElement('div'); left.innerHTML = `<div style="font-weight:600">${m.name}</div><div class="small">For: ${m.for}</div>`;
+        const right = document.createElement('div');
+        const btn = document.createElement('button'); btn.className='buyBtn';
+        if(m.oneTime && owned>0){ btn.textContent = 'Owned'; btn.classList.add('disabled'); }
+        else { btn.textContent = formatMoney(cost); btn.onclick = ()=>{ if(state.money >= cost){ state.money -= cost; state.managers[m.id] = 1; save(); buildUpgrades(); uiUpdate(); playSfx(); } }; }
+        right.appendChild(btn); row.appendChild(left); row.appendChild(right); list.appendChild(row);
+      });
+
+      // buildings list (click to view building-specific upgrades)
+      const info = qid('upgradesInfo'); info.innerHTML = '';
+      CONFIG.shop.filter(s=>s.type==='generator').forEach(b=>{
+        const owned = Number(state.shop[b.id]||0);
+        const el = document.createElement('div'); el.className='building-row'; el.innerHTML = `<div style="font-weight:600">${b.name}</div><div class="small">Owned: ${owned} • ${b.power}/cycle every ${b.interval}s</div>`;
+        el.onclick = ()=>{ openBuildingUpgrades(b.id); };
+        info.appendChild(el);
+      });
     }
 
-    function tick(){ const now = Date.now(); const dt = (now - state.lastTick)/1000; state.lastTick = now; CONFIG.shop.forEach(it=>{ if(it.type!=='generator') return; const owned = Number(state.s[... omitted for brevity ...]
+    /* Building upgrades UI */
+    function openBuildingUpgrades(buildId){ qid('buildingUpgrades').style.display = 'flex'; qid('upgradesScreen').style.display = 'none'; buildBuildingUpgrades(buildId); }
+    function closeBuildingUpgrades(){ qid('buildingUpgrades').style.display = 'none'; qid('upgradesScreen').style.display = 'flex'; }
+
+    function buildBuildingUpgrades(buildId){ const cfg = CONFIG.buildingUpgrades[buildId]||[]; const body = qid('buBody'); body.innerHTML = ''; const title = qid('buTitle'); const b = CONFIG.shop.find(s=>s.id===buildId); title.textContent = b ? b.name + ' — Upgrades' : 'Upgrades';
+      if(cfg.length===0) body.innerHTML = '<div class="small">No upgrades defined for this building.</div>';
+      cfg.forEach(up=>{
+        const owned = state.upgradesOwned[up.id];
+        const row = document.createElement('div'); row.className='upgrade-row';
+        const left = document.createElement('div'); left.innerHTML = `<div style="font-weight:600">${up.name}</div><div class="small">Effect: ${JSON.stringify(up.effect)}</div>`;
+        const right = document.createElement('div');
+        const btn = document.createElement('button'); btn.className='buyBtn';
+        if(owned){ btn.textContent = 'Owned'; btn.classList.add('disabled'); }
+        else { btn.textContent = formatMoney(up.baseCost); btn.onclick = ()=>{ if(state.money >= up.baseCost){ state.money -= up.baseCost; state.upgradesOwned[up.id] = 1; applyUpgrade(buildId, up); save(); buildBuildingUpgrades(buildId); uiUpdate(); playSfx(); } }; }
+        right.appendChild(btn); row.appendChild(left); row.appendChild(right); body.appendChild(row);
+      });
+    }
+
+    function applyUpgrade(buildId, up){ const b = CONFIG.shop.find(s=>s.id===buildId); if(!b) return; const eff = up.effect; if(eff.power) b.power *= eff.power; if(eff.intervalFactor) b.interval = Math.max(0.001, b.interval * eff.intervalFactor); }
+
+    function hookUI(){ qid('clicker').addEventListener('click', ()=>{ const now = Date.now(); if(now - state.lastClick < state.clickCooldownMs){ flash(qid('clicker')); return; } state.lastClick = now; state.money += state.perClick * investorsMultiplier(); playSfx(); save(); uiUpdate(); });
+      qid('saveBtn').addEventListener('click', ()=>{ save(); pulse(qid('saveBtn')); });
+      qid('resetBtn').addEventListener('click', ()=>{ if(confirm('Reset save? This cannot be undone.')){ state = {money:0, perClick:1, clickCooldownMs: CONFIG.baseClickCooldownMs, lastClick:0, shop:{}, managers:{}, investors:{}, buildingsProgress:{}, buildingsLastCollectMs:{}, upgradesOwned:{}, lastTick: Date.now(), audioMuted:false, evolution:1, prestige:0 }; state.shop['stand'] = 1; save(); uiUpdate(); } });
+      qid('muteBtn').addEventListener('click', ()=>{ state.audioMuted = !state.audioMuted; qid('muteBtn').textContent = state.audioMuted ? '🔇' : '🔊'; save(); });
+
+      // Upgrades full screen
+      qid('ascendBtn').addEventListener('click', ()=>{ openUpgrades(); });
+      qid('closeUpgrades').addEventListener('click', ()=>{ closeUpgrades(); });
+      qid('closeBu').addEventListener('click', ()=>{ closeBuildingUpgrades(); });
+    }
+
+    function flash(el){ if(!el) return; try{ el.animate([{transform:'scale(1)'},{transform:'scale(1.04)'},{transform:'scale(1)'}],{duration:200}); }catch(e){} }
+    function pulse(el){ if(!el) return; try{ el.animate([{opacity:1},{opacity:0.6},{opacity:1}],{duration:300}); }catch(e){} }
+    function playSfx(){ if(state.audioMuted) return; try{ const s = new Audio('https://www.soundjay.com/button/sounds/button-16.mp3'); s.volume = 0.6; s.play().catch(()=>{});}catch(e){} }
+
+    function init(){ load(); // ensure defaults
+      CONFIG.shop.forEach(it=>{ if(!(it.id in state.shop)) state.shop[it.id]=0; if(it.type==='generator' && !(it.id in state.buildingsProgress)) state.buildingsProgress[it.id]=0; if(it.type==='generator' && !(it.id in state.buildingsLastCollectMs)) state.buildingsLastCollectMs[it.id]=0; });
+      CONFIG.managers.forEach(m=>{ if(!(m.id in state.managers)) state.managers[m.id]=0; });
+      CONFIG.investors.forEach(inv=>{ if(!(inv.id in state.investors)) state.investors[inv.id]=0; });
+      if(!state.upgradesOwned) state.upgradesOwned = {};
+      // start with one Lemon Stand if nothing owned
+      if(!Object.values(state.shop).some(v=>Number(v)>0)) state.shop['stand'] = 1;
+      const img = qid('lemonImg'); img.onerror = ()=>{}; img.src = 'https://source.unsplash.com/1600x900/?lemon'; hookUI(); uiUpdate(); state.lastTick = Date.now(); setInterval(tick, 1000);
+    }
+
+    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  })();
+  </script>
+</body>
+</html>
