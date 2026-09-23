@@ -29,7 +29,16 @@ main{display:flex;gap:18px;align-items:flex-start}#timers-panel{width:220px}#pla
 <script>
 (()=>{
 const KEY='lemon_money_v2',E=id=>document.getElementById(id);
-const shop=[['stand','Lemon Stand',2500,1,5,1,500],['dash','Lemon Dash',15000,6,4,6,600],['depot','Lemon Depot',90000,80,12,80,800],['trading','Lemon Trading',450000,420,10,420,900],['labs','Lemon Labs',2500000,2600,8,2600,1000],['robotics','Lemon Robotics',12000000,11000,6,11000,1100],['republic','Lemon Republic',75000000,62000,14,62000,1200],['lemonx','LemonX',8.8e67,300000,20,350000,1500]];
+const shop=[
+  ['stand','Lemon Stand',2500,1,5,1,500],
+  ['dash','Lemon Dash',10000,4,4,4,600],
+  ['depot','Lemon Depot',40000,16,12,16,800],
+  ['trading','Lemon Trading',160000,64,10,64,900],
+  ['labs','Lemon Labs',640000,256,8,256,1000],
+  ['robotics','Lemon Robotics',2560000,1024,6,1024,1100],
+  ['republic','Lemon Republic',10240000,4096,14,4096,1200],
+  ['lemonx','LemonX',40960000,16384,20,16384,1500]
+];
 const global=[['click_power','Upgrade: Click Power',1200000,'Click power +1000'],['click_speed','Upgrade: Click Speed',2000000,'Click cooldown ×0.005']];
 const building={stand:[['stand_up1','Upgrade 1',50,'Power ×3'],['stand_up2','Upgrade 2',120,'Interval ×0.8'],['stand_up3','Upgrade 3',300,'Power ×4'],['stand_up4','Upgrade 4',1000,'Power ×4'],['stand_up5','Upgrade 5',1000,'Power ×4'],['stand_up6','Upgrade 6',1000,'Interval ×0.01']],dash:[['dash_up1','Upgrade 1',3000,'Power ×3'],['dash_up2','Upgrade 2',7000,'Interval ×0.85']],depot:[['depot_up1','Upgrade 1',20000,'Power +200']],trading:[['trading_up1','Upgrade 1',80000,'Power +1000']],labs:[['labs_up1','Upgrade 1',250000,'Power +5000']],robotics:[['robotics_up1','Upgrade 1',900000,'Power +20000']],republic:[['republic_up1','Upgrade 1',4000000,'Power +100000']],lemonx:[['lemonx_up1','Upgrade 1',8e66,'Power +1000000']]};
 let s={money:1,perClick:1,cooldown:250,lastClick:0,owned:{},managers:{},investors:0,progress:{},lastCollect:{},upgrades:{},muted:false,lastTick:Date.now()};
