@@ -1,74 +1,31 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Lemon Clicker — Money Edition</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root{--accent:#f6b93b;--bg:#081218;--muted:rgba(230,238,246,.9);--surface:rgba(255,255,255,.05)}
-    *{box-sizing:border-box;font-family:Inter,system-ui,sans-serif}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--muted)}
-    #game{max-width:1200px;margin:0 auto;padding:18px}header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}h1{margin:0;font-size:20px}
-    .controls button,.buyBtn{padding:8px 10px;border:0;border-radius:8px;background:var(--accent);color:#081218;font-weight:700;cursor:pointer}.controls button{margin-left:8px}.controls #muteBtn{background:var(--surface);color:var(--muted)}
-    main{display:flex;gap:18px;align-items:flex-start}#timers-panel{width:220px}#play-area{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center}
-    #sidebar{width:300px}.stat{display:flex;justify-content:space-between;padding:6px 0}.panel{background:var(--surface);padding:16px;border-radius:10px;margin-top:12px}
-    #lemon-card{width:min(100%,460px);height:260px;background:var(--surface);border-radius:12px;display:flex;align-items:center;justify-content:center;position:relative}
-    #lemonImg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:12px;opacity:.08}#lemonOverlay{position:relative;z-index:1;text-align:center}
-    #clicker{font-size:40px;padding:18px;border:0;border-radius:999px;background:rgba(255,255,255,.06);color:var(--muted);cursor:pointer}#perClick{margin-top:8px;font-weight:700}
-    #upgradesContainer{width:min(100%,460px);margin-top:16px;display:flex;flex-direction:column;gap:8px}.upgrade-section{font-size:14px;font-weight:700;margin-top:8px}
-    .upgrade-row,.row,.manager-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;background:var(--surface);border-radius:8px}.upgrade-row .description{flex:1}.small{font-size:12px;color:rgba(230,238,246,.72)}
-    .disabled{opacity:.5;pointer-events:none}#shop .row,#investors .row{border-bottom:1px solid rgba(255,255,255,.08);background:transparent;border-radius:0;padding:9px 0}
-    #timersList>div{padding:9px 0;border-bottom:1px solid rgba(255,255,255,.08)}footer{margin-top:14px;font-size:12px;color:rgba(230,238,246,.6)}
-    @media(max-width:900px){main{flex-wrap:wrap}#timers-panel{order:2;width:100%}#play-area{order:1;width:100%}#sidebar{order:3;width:100%}}
-  </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lemon Clicker — Money Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--accent:#f6b93b;--bg:#081218;--muted:rgba(230,238,246,.9);--surface:rgba(255,255,255,.05)}*{box-sizing:border-box;font-family:Inter,system-ui,sans-serif}body{margin:0;background:var(--bg);color:var(--muted)}#game{max-width:1100px;margin:auto;padding:18px}header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}h1{font-size:20px;margin:0}.controls button,.buyBtn{border:0;border-radius:8px;padding:8px 10px;background:var(--accent);color:#081218;font-weight:700;cursor:pointer}.controls button{margin-left:8px}.controls #muteBtn{background:var(--surface);color:var(--muted)}main{display:flex;gap:18px;align-items:flex-start}#timers-panel{width:220px}#play-area{flex:1;display:flex;flex-direction:column;align-items:center;min-width:0}#sidebar{width:260px}.stat{display:flex;justify-content:space-between;padding:6px 0}.panel{background:var(--surface);padding:14px;border-radius:10px;margin-top:12px}#lemon-card{width:min(100%,480px);height:260px;background:var(--surface);border-radius:12px;display:flex;align-items:center;justify-content:center;position:relative}#lemonImg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:12px;opacity:.08}#lemonOverlay{position:relative;text-align:center;z-index:1}#clicker{font-size:40px;padding:18px;border:0;border-radius:999px;background:rgba(255,255,255,.06);color:var(--muted);cursor:pointer}#perClick{margin-top:8px;font-weight:700}.small{font-size:12px;color:rgba(230,238,246,.72)}#upgradesContainer{width:min(100%,480px);display:flex;flex-direction:column;gap:8px;margin-top:16px}.upgrade-section{font-size:14px;font-weight:700;margin-top:8px}.upgrade-row,.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;background:var(--surface);border-radius:8px}.description{flex:1}.disabled{opacity:.5;pointer-events:none}#timersList>div{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08)}footer{margin-top:14px;font-size:12px;color:rgba(230,238,246,.6)}@media(max-width:900px){main{flex-wrap:wrap}#timers-panel,#sidebar,#play-area{width:100%}#play-area{order:1}#timers-panel{order:2}#sidebar{order:3}}
+</style>
 </head>
-<body>
-<div id="game">
-  <header><h1>Lemon Clicker — Money</h1><div class="controls"><button id="muteBtn">🔊</button></div></header>
-  <main>
-    <aside id="timers-panel"><h3>Building Timers</h3><div id="timersList">Own a building to see its timer here.</div></aside>
-    <section id="play-area">
-      <div id="lemon-card"><img id="lemonImg" alt="Lemon"><div id="lemonOverlay"><button id="clicker">🍋</button><div id="perClick">+$1</div><div class="small">Click to earn money.</div></div></div>
-      <div id="upgradesContainer"></div>
-    </section>
-    <aside id="sidebar">
-      <div class="stat"><span>Money</span><strong id="money">$0</strong></div><div class="stat"><span>Money / sec</span><strong id="mps">0/s</strong></div>
-      <div class="stat"><span>Evolution</span><strong id="evolution">1</strong></div><div class="stat"><span>Prestige</span><strong id="prestige">0</strong></div>
-      <div class="panel"><h4>Shop</h4><div id="shop"></div></div><div class="panel"><h4>Investors</h4><div id="investors"></div></div>
-      <div class="panel small"><h4>Save</h4><button id="saveBtn">Save</button> <button id="resetBtn">Reset</button></div>
-    </aside>
-  </main>
-  <footer>Base click cooldown: <span id="clickCooldownDisplay">250</span> ms</footer>
-</div>
+<body><div id="game">
+<header><h1>Lemon Clicker — Money</h1><div class="controls"><button id="muteBtn">🔊</button></div></header>
+<main><aside id="timers-panel"><h3>Building Timers</h3><div id="timersList"></div></aside>
+<section id="play-area"><div id="lemon-card"><img id="lemonImg" alt="Lemon"><div id="lemonOverlay"><button id="clicker">🍋</button><div id="perClick">+$1</div><div class="small">Click to earn money.</div></div></div><div id="upgradesContainer"></div></section>
+<aside id="sidebar"><div class="stat"><span>Money</span><strong id="money">$0</strong></div><div class="stat"><span>Money / sec</span><strong id="mps">0/s</strong></div><div class="stat"><span>Evolution</span><strong>1</strong></div><div class="stat"><span>Prestige</span><strong>0</strong></div><div class="panel small"><button id="saveBtn">Save</button> <button id="resetBtn">Reset</button></div></aside></main>
+<footer>Base click cooldown: <span id="clickCooldownDisplay">250</span> ms</footer></div>
 <script>
-(function(){
-  const KEY='lemon_money_v2', $=id=>document.getElementById(id);
-  const shop=[
-    {id:'stand',name:'Lemon Stand',cost:2500,power:1,interval:5,manual:1},
-    {id:'dash',name:'Lemon Dash',cost:15000,power:6,interval:4,manual:6},
-    {id:'depot',name:'Lemon Depot',cost:90000,power:80,interval:12,manual:80},
-    {id:'trading',name:'Lemon Trading',cost:450000,power:420,interval:10,manual:420},
-    {id:'labs',name:'Lemon Labs',cost:2500000,power:2600,interval:8,manual:2600},
-    {id:'robotics',name:'Lemon Robotics',cost:12000000,power:11000,interval:6,manual:11000},
-    {id:'republic',name:'Lemon Republic',cost:75000000,power:62000,interval:14,manual:62000},
-    {id:'lemonx',name:'LemonX',cost:8.8e67,power:300000,interval:20,manual:350000}
-  ];
-  const managers=shop.map(x=>({id:x.id+'_manager',name:x.name+' Manager',for:x.id,cost:x.cost}));
-  const buildingUpgrades={stand:[['stand_up1','Upgrade 1',50,{power:3}],['stand_up2','Upgrade 2',120,{intervalFactor:.8}],['stand_up3','Upgrade 3',300,{power:4}],['stand_up4','Upgrade 4',1000,{power:4}],['stand_up5','Upgrade 5',1000,{power:4}],['stand_up6','Upgrade 6',1000,{intervalFactor:.01}]],dash:[['dash_up1','Upgrade 1',3000,{power:3}],['dash_up2','Upgrade 2',7000,{intervalFactor:.85}],depot:[['depot_up1','Upgrade 1',20000,{powerAdd:200}]],trading:[['trading_up1','Upgrade 1',80000,{powerAdd:1000}]],labs:[['labs_up1','Upgrade 1',250000,{powerAdd:5000}]],robotics:[['robotics_up1','Upgrade 1',900000,{powerAdd:20000}]],republic:[['republic_up1','Upgrade 1',4000000,{powerAdd:100000}]],lemonx:[['lemonx_up1','Upgrade 1',8e66,{powerAdd:1000000}]]};
-  const global=[['click_power','Upgrade: Click Power',1200000,{clickPower:1000}],['click_speed','Upgrade: Click Speed',2000000,{speedFactor:.005}]];
-  let state={money:1,perClick:1,cooldown:250,lastClick:0,owned:{},managers:{},investors:{},progress:{},lastCollect:{},upgrades:{},muted:false};
-  function money(n){if(!isFinite(n))return '$0';if(n<1e6)return '$'+Math.floor(n).toLocaleString();let t=Math.floor(Math.log10(n)/3),s=['','K','M','B','T','Qa','Qi','Sx','Sp','Oc','No','Dc'];return t<=12?'$'+Math.round(n/Math.pow(1000,t)*10)/10+s[t]:'$'+n.toExponential(2)}
-  function save(){localStorage.setItem(KEY,JSON.stringify(state))}function load(){try{let x=JSON.parse(localStorage.getItem(KEY));if(x)state=Object.assign(state,x)}catch(e){}}
-  function mult(){return Math.pow(1.05,Number(state.investors.angel||0))}function mps(){return shop.reduce((n,b)=>n+(state.owned[b.id]&&state.managers[b.id+'_manager']?b.power/b.interval:0),0)*mult()}
-  function buyRow(parent,label,desc,cost,owned,action){let row=document.createElement('div');row.className='upgrade-row';let text=document.createElement('div');text.className='description';text.innerHTML='<div style="font-weight:600">'+label+'</div><div class="small">'+desc+'</div>';let btn=document.createElement('button');btn.className='buyBtn';btn.textContent=owned?'Owned':money(cost);if(owned)btn.classList.add('disabled');else btn.onclick=()=>{if(state.money>=cost){state.money-=cost;action();save();render()}};row.append(text,btn);parent.append(row)}
-  function renderUpgrades(){let c=$('upgradesContainer');c.innerHTML='<div class="upgrade-section">Global upgrades</div>';global.forEach(u=>buyRow(c,u[1],'One-time upgrade',u[2],state.upgrades[u[0]],()=>{state.upgrades[u[0]]=1;if(u[3].clickPower)state.perClick+=u[3].clickPower;if(u[3].speedFactor)state.cooldown=Math.max(30,Math.floor(state.cooldown*u[3].speedFactor))}));c.insertAdjacentHTML('beforeend','<div class="upgrade-section">Managers</div>');managers.forEach(m=>buyRow(c,m.name,'Automates '+m.for,m.cost,state.managers[m.id],()=>state.managers[m.id]=1));c.insertAdjacentHTML('beforeend','<div class="upgrade-section">Building upgrades</div>');shop.forEach(b=>{(buildingUpgrades[b.id]||[]).forEach(u=>buyRow(c,b.name+' — '+u[1],'Effect: '+JSON.stringify(u[3]),u[2],state.upgrades[u[0]],()=>{state.upgrades[u[0]]=1;if(u[3].power)b.power*=u[3].power;if(u[3].powerAdd)b.power+=u[3].powerAdd;if(u[3].intervalFactor)b.interval*=u[3].intervalFactor}))})}
-  function renderShop(){let el=$('shop');el.innerHTML='';shop.forEach(b=>{let row=document.createElement('div');row.className='row';row.innerHTML='<span><b>'+b.name+'</b><br><span class="small">'+(state.owned[b.id]?'Owned':'One-time purchase')+' · '+b.power+'/cycle every '+b.interval+'s</span></span>';let btn=document.createElement('button');btn.className='buyBtn';btn.textContent=state.owned[b.id]?'Owned':money(b.cost);if(state.owned[b.id])btn.classList.add('disabled');else btn.onclick=()=>{if(state.money>=b.cost){state.money-=b.cost;state.owned[b.id]=1;state.progress[b.id]=0;save();render()}};row.append(btn);el.append(row)})}
-  function renderInvestors(){let el=$('investors');el.innerHTML='';let row=document.createElement('div');row.className='row';row.innerHTML='<span><b>Angel Investor</b><br><span class="small">Permanent +5% multiplier</span></span>';let btn=document.createElement('button');btn.className='buyBtn';btn.textContent=money(10000);btn.onclick=()=>{if(state.money>=10000){state.money-=10000;state.investors.angel=(state.investors.angel||0)+1;save();render()}};row.append(btn);el.append(row)}
-  function renderTimers(){let el=$('timersList');el.innerHTML='';let any=false;shop.forEach(b=>{if(!state.owned[b.id])return;any=true;let d=document.createElement('div');d.innerHTML='<b>'+b.name+'</b><br><span class="small">'+(state.managers[b.id+'_manager']?'Automated':'Progress: '+Math.floor(state.progress[b.id]||0)+'s')+'</span>';el.append(d)});if(!any)el.textContent='Own a building to see its timer here.'}
-  function render(){ $('money').textContent=money(state.money);$('mps').textContent=Math.floor(mps())+'/s';$('perClick').textContent='+$'+state.perClick;$('clickCooldownDisplay').textContent=state.cooldown;$('muteBtn').textContent=state.muted?'🔇':'🔊';renderUpgrades();renderShop();renderInvestors();renderTimers()}
-  function tick(){let now=Date.now(),dt=(now-(state.lastTick||now))/1000;state.lastTick=now;shop.forEach(b=>{if(!state.owned[b.id])return;state.progress[b.id]=(state.progress[b.id]||0)+dt;if(state.managers[b.id+'_manager']){let cycles=Math.floor(state.progress[b.id]/b.interval);if(cycles){state.money+=cycles*b.power*mult();state.progress[b.id]%=b.interval}}});render()}
-  $('clicker').onclick=()=>{let n=Date.now();if(n-state.lastClick<state.cooldown)return;state.lastClick=n;state.money+=state.perClick*mult();render()};$('saveBtn').onclick=save;$('resetBtn').onclick=()=>{if(confirm('Reset save? This cannot be undone.')){localStorage.removeItem(KEY);location.reload()}};$('muteBtn').onclick=()=>{state.muted=!state.muted;save();render()};load();shop.forEach(b=>{if(!(b.id in state.owned))state.owned[b.id]=0;if(!(b.id in state.progress))state.progress[b.id]=0});if(!Object.values(state.owned).some(Boolean))state.owned.stand=1;$('lemonImg').src='https://source.unsplash.com/1600x900/?lemon';render();setInterval(tick,1000)
+(()=>{
+const KEY='lemon_money_v2',E=id=>document.getElementById(id);
+const shop=[['stand','Lemon Stand',2500,1,5],['dash','Lemon Dash',15000,6,4],['depot','Lemon Depot',90000,80,12],['trading','Lemon Trading',450000,420,10],['labs','Lemon Labs',2500000,2600,8],['robotics','Lemon Robotics',12000000,11000,6],['republic','Lemon Republic',75000000,62000,14],['lemonx','LemonX',8.8e67,300000,20]];
+const global=[['click_power','Upgrade: Click Power',1200000,'Click power +1000'],['click_speed','Upgrade: Click Speed',2000000,'Click cooldown ×0.005']];
+const building={stand:[['stand_up1','Upgrade 1',50,'Power ×3'],['stand_up2','Upgrade 2',120,'Interval ×0.8'],['stand_up3','Upgrade 3',300,'Power ×4'],['stand_up4','Upgrade 4',1000,'Power ×4'],['stand_up5','Upgrade 5',1000,'Power ×4'],['stand_up6','Upgrade 6',1000,'Interval ×0.01']],dash:[['dash_up1','Upgrade 1',3000,'Power ×3'],['dash_up2','Upgrade 2',7000,'Interval ×0.85']],depot:[['depot_up1','Upgrade 1',20000,'Power +200']],trading:[['trading_up1','Upgrade 1',80000,'Power +1000']],labs:[['labs_up1','Upgrade 1',250000,'Power +5000']],robotics:[['robotics_up1','Upgrade 1',900000,'Power +20000']],republic:[['republic_up1','Upgrade 1',4000000,'Power +100000']],lemonx:[['lemonx_up1','Upgrade 1',8e66,'Power +1000000']]};
+let s={money:1,perClick:1,cooldown:250,lastClick:0,owned:{},managers:{},investors:0,progress:{},upgrades:{},muted:false,lastTick:Date.now()};
+const fmt=n=>!isFinite(n)?'$0':n<1e6?'$'+Math.floor(n).toLocaleString():'$'+n.toExponential(2);const mult=()=>Math.pow(1.05,s.investors||0);const save=()=>localStorage.setItem(KEY,JSON.stringify(s));function load(){try{Object.assign(s,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}}
+function addRow(c,name,desc,cost,id,action){let r=document.createElement('div');r.className='upgrade-row';r.innerHTML='<div class="description"><b>'+name+'</b><div class="small">'+desc+'</div></div>';let b=document.createElement('button');b.className='buyBtn';b.textContent=s.upgrades[id]||s.managers[id]?'Owned':fmt(cost);if(s.upgrades[id]||s.managers[id])b.classList.add('disabled');else b.onclick=()=>{if(s.money>=cost){s.money-=cost;action();save();render()}};r.append(b);c.append(r)}
+function renderOptions(){let c=E('upgradesContainer');c.innerHTML='';let h=t=>{let x=document.createElement('div');x.className='upgrade-section';x.textContent=t;c.append(x)};h('Shop');shop.forEach(b=>{let[id,n,cost,power,int]=b;addRow(c,n,'One-time purchase · '+power+'/cycle every '+int+'s',cost,'shop_'+id,()=>{s.owned[id]=1})});h('Investors');addRow(c,'Angel Investor','Permanent +5% money multiplier',10000,'investor',()=>s.investors++);h('Global upgrades');global.forEach(u=>addRow(c,u[1],u[3],u[2],u[0],()=>{if(u[0]=='click_power')s.perClick+=1000;else s.cooldown=Math.max(30,Math.floor(s.cooldown*.005))}));h('Managers');shop.forEach(b=>{let[id,n,cost]=b;addRow(c,n+' Manager','Automates '+n,cost,'manager_'+id,()=>s.managers[id]=1)});h('Building upgrades');shop.forEach(b=>(building[b[0]]||[]).forEach(u=>addRow(c,b[1]+' — '+u[1],u[3],u[2],u[0],()=>{let x=b;if(u[3].includes('Power ×'))x[3]*=+u[3].match(/\d+/)[0];else if(u[3].includes('Power +'))x[3]+=+u[3].match(/\d+/)[0];else x[4]*=+u[3].match(/\d+(?:\.\d+)?/)[0]})))}
+function render(){E('money').textContent=fmt(s.money);E('mps').textContent=Math.floor(shop.reduce((n,b)=>n+(s.owned[b[0]]&&s.managers[b[0]]?b[3]/b[4]:0),0)*mult())+'/s';E('perClick').textContent='+$'+s.perClick;E('clickCooldownDisplay').textContent=s.cooldown;E('muteBtn').textContent=s.muted?'🔇':'🔊';renderOptions();let t=E('timersList');t.innerHTML='';shop.forEach(b=>{if(s.owned[b[0]])t.innerHTML+='<div><b>'+b[1]+'</b><br><span class="small">'+(s.managers[b[0]]?'Automated':'Progress: '+Math.floor(s.progress[b[0]]||0)+'s')+'</span></div>'});if(!t.innerHTML)t.textContent='Own a building to see its timer here.'}
+function tick(){let now=Date.now(),dt=(now-s.lastTick)/1000;s.lastTick=now;shop.forEach(b=>{if(!s.owned[b[0]])return;s.progress[b[0]]=(s.progress[b[0]]||0)+dt;if(s.managers[b[0]]){let q=Math.floor(s.progress[b[0]]/b[4]);s.money+=q*b[3]*mult();s.progress[b[0]]%=b[4]}});render()}
+load();shop.forEach(b=>{s.owned[b[0]]??=false;s.progress[b[0]]??=0});if(!Object.values(s.owned).some(Boolean))s.owned.stand=true;E('clicker').onclick=()=>{let n=Date.now();if(n-s.lastClick>=s.cooldown){s.lastClick=n;s.money+=s.perClick*mult();render()}};E('saveBtn').onclick=save;E('resetBtn').onclick=()=>{if(confirm('Reset save?')){localStorage.removeItem(KEY);location.reload()}};E('muteBtn').onclick=()=>{s.muted=!s.muted;save();render()};E('lemonImg').src='https://source.unsplash.com/1600x900/?lemon';render();setInterval(tick,1000)
 })();
-</script>
-</body>
-</html>
+</script></body></html>
