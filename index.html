@@ -1,51 +1,784 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Lemon Clicker — Money Edition</title>
-<style>
-:root{--bg:#081218;--panel:#ffffff0d;--text:#edf6ff;--muted:#b9c8d6;--accent:#f6b93b;--good:#8ee38e}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px system-ui,sans-serif}button{border:0;border-radius:8px;padding:9px 12px;background:var(--accent);color:#081218;font-weight:700;cursor:pointer}button:disabled,.owned-button{background:#59636b;color:#cbd3d9;cursor:not-allowed;opacity:.75}.app{max-width:1200px;margin:auto;padding:18px}.top,.row,.stat,.money{display:flex;align-items:center;justify-content:space-between;gap:10px}.top{margin-bottom:18px}.top h1{font-size:21px;margin:0}.layout{display:grid;grid-template-columns:220px 1fr 280px;gap:18px}.panel,.card,.row,.money{background:var(--panel);border-radius:11px;padding:12px}.panel{margin-bottom:12px}.lemon{height:260px;display:grid;place-items:center;position:relative;overflow:hidden}.lemon img{position:absolute;width:100%;height:100%;object-fit:cover;opacity:.13}.lemon-inner{position:relative;text-align:center}.clicker{font-size:44px;border-radius:50%;width:110px;height:110px}.shop,.grid{display:grid;gap:8px;margin-top:14px}.shop{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}.info{flex:1}.small{font-size:12px;color:var(--muted)}.stat{padding:8px 0;border-bottom:1px solid #ffffff14}.progress{height:8px;background:#ffffff18;border-radius:99px;overflow:hidden;margin:7px 0}.progress span{display:block;height:100%;background:var(--accent)}.screen{display:none;position:fixed;inset:0;z-index:10;background:var(--bg);overflow:auto;padding:26px}.screen.open{display:block}.screen-head,.screen-content{max-width:980px;margin:auto}.screen-head{display:flex;justify-content:space-between;align-items:center}.screen-content{margin-top:18px}.float{position:fixed;z-index:20;color:var(--accent);font-weight:800;pointer-events:none;animation:float 1s forwards}@keyframes float{to{opacity:0;transform:translateY(-60px)}}@media(max-width:900px){.layout{grid-template-columns:1fr}.shop{grid-template-columns:1fr}}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Lemon Clicker — Money Edition</title>
+  <style>
+    :root {
+      --bg: #081218;
+      --panel: rgba(255,255,255,.06);
+      --panel-strong: rgba(255,255,255,.09);
+      --text: #edf6ff;
+      --muted: rgba(237,246,255,.8);
+      --accent: #f6b93b;
+      --good: #8ee38e;
+      --warning: #ffdb6e;
+      --danger: #ff5b5b;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--bg); color: var(--text); font-family: Inter, system-ui, sans-serif; }
+    body { min-height: 100vh; }
+    button {
+      background: var(--accent); color: #081218; border: none; border-radius: 8px;
+      padding: 8px 10px; font-weight: 700; cursor: pointer;
+    }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+    .app { max-width: 1200px; margin: 0 auto; padding: 18px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .topbar h1 { margin: 0; font-size: 1.5rem; }
+    .layout { display: grid; grid-template-columns: 220px 1fr 280px; gap: 18px; }
+    .panel { background: var(--panel); border-radius: 12px; padding: 12px; }
+    .panel h3, .panel h4 { margin: 0 0 10px; }
+    .card { background: var(--panel); border-radius: 12px; padding: 16px; }
+    .stat-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .stat-row:last-child { border-bottom: 0; }
+    .lemon-card {
+      position: relative; height: 260px; display: grid; place-items: center; overflow: hidden;
+      border-radius: 12px; background: var(--panel); margin-bottom: 14px;
+    }
+    .lemon-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .14; }
+    .lemon-inner { position: relative; z-index: 1; text-align: center; }
+    #clicker { font-size: 44px; border-radius: 999px; width: 110px; height: 110px; }
+    .shop, .upgrade-grid, .building-grid { display: grid; gap: 8px; margin-top: 16px; }
+    .shop { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .upgrade-grid, .building-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--panel); border-radius: 10px; padding: 10px 12px; }
+    .row .info { flex: 1; }
+    .small { font-size: 12px; color: var(--muted); }
+    .owned { color: var(--good); font-weight: 700; }
+    .screen {
+      position: fixed; inset: 0; display: none; background: var(--bg); z-index: 20; padding: 26px;
+      overflow: auto;
+    }
+    .screen.open { display: block; }
+    .screen-header { max-width: 980px; margin: 0 auto 18px; display: flex; justify-content: space-between; align-items: center; }
+    .screen-content { max-width: 980px; margin: 0 auto; }
+    .money-banner {
+      display: flex; justify-content: space-between; align-items: center; gap: 12px;
+      background: var(--panel); border-radius: 10px; padding: 12px 14px; font-size: 1.1rem; margin-bottom: 18px;
+    }
+    .progress-bar { height: 8px; background: rgba(255,255,255,.08); border-radius: 999px; overflow: hidden; margin: 8px 0; }
+    .progress-bar > span { display: block; height: 100%; width: 0; background: var(--accent); }
+    .floating-text {
+      position: fixed; z-index: 40; pointer-events: none; font-weight: 800; color: var(--accent);
+      animation: floatUp 1s ease forwards;
+    }
+    .combo { color: var(--warning); font-weight: 800; }
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-60px) scale(1.3); }
+    }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .shop { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
-<div class="app"><header class="top"><h1 id="title">Lemon Clicker — Money</h1><div><button id="upgradesBtn">Upgrades</button><button id="muteBtn">🔊</button></div></header><div class="layout"><aside><div class="panel"><h3>Building Timers</h3><div id="timers"></div></div><div class="panel"><h3>Quests</h3><div id="quests"></div></div></aside><main><div class="card lemon"><img id="fruitImage" alt="fruit"><div class="lemon-inner"><button id="clicker" class="clicker">🍋</button><div id="perClick">+$1</div><div id="combo">Combo ×1</div></div></div><div id="shop" class="shop"></div><div class="card"><div id="eventText" class="small">No event active</div><div class="progress"><span id="eventBar"></span></div></div></main><aside><div class="stat"><span>Money</span><b id="money">$0</b></div><div class="stat"><span>Money/sec</span><b id="mps">0/s</b></div><div class="stat"><span>Evolution</span><b id="evolution">1</b></div><div class="stat"><span>Prestige</span><b id="prestige">0</b></div><div class="stat"><span>Investors</span><b id="investors">0</b></div><div class="panel"><button id="investorBtn">Buy Investor</button><button id="evolutionBtn">Evolve</button><button id="prestigeBtn" style="width:100%;margin-top:8px">Prestige</button><button id="saveBtn" style="width:100%;margin-top:8px">Save</button><button id="resetBtn" style="width:100%;margin-top:8px">Reset</button><div id="message" class="small"></div></div><div class="panel"><h3>Achievements</h3><div id="achievements"></div></div></aside></div></div>
-<div id="upgradesScreen" class="screen"><div class="screen-head"><h2>Upgrades</h2><button id="closeUpgrades">Close</button></div><div class="screen-content"><div class="money"><span>Current money</span><b id="upgradeMoney">$0</b></div><h3>Global Upgrades</h3><div id="globalGrid" class="grid"></div><h3>Managers</h3><div id="managerGrid" class="grid"></div><h3>Building Upgrades</h3><div id="buildingGrid" class="grid"></div></div></div>
-<div id="buildingScreen" class="screen"><div class="screen-head"><h2 id="buildingTitle">Building Upgrades</h2><button id="backToUpgrades">Back to Upgrades</button></div><div class="screen-content"><div class="money"><span>Current money</span><b id="buildingMoney">$0</b></div><div id="buildingUpgradeGrid" class="grid"></div></div></div>
-<script>
-(()=>{'use strict';
-const $=id=>document.getElementById(id),KEY='lemon_money_v2',MAX=8.8e67,BASE=250;
-const fruits=[['Lemon','#f6b93b','🍋'],['Orange','#f28c28','🍊'],['Lime','#a5f57a','🍈'],['Grapefruit','#ff8fa3','🍊'],['Sour???','#4caf50','🍏']];
-const defs=[['stand','Lemon Stand',1,5],['dash','Lemon Dash',4,4],['depot','Lemon Depot',16,12],['trading','Lemon Trading',64,10],['labs','Lemon Labs',256,8],['robotics','Lemon Robotics',1024,6],['republic','Lemon Republic',4096,14],['lemonx','LemonX',16384,20]];
-const effects=['Power ×2','Interval ×0.8','Power ×3','Power +20','Interval ×0.75','Power ×4','Power +50','Interval ×0.7','Power ×2','Interval ×0.6'];
-const state={money:1,perClick:1,cooldown:250,lastClick:0,owned:{},managers:{},progress:{},upgrades:{},buildingStats:{},investors:0,evolution:1,prestige:0,prestigeCost:1e6,lastSavedAt:Date.now(),lastTick:Date.now(),combo:1,lastComboAt:0,clicks:0,totalEarned:0,collectibles:0,achievements:{},quests:{},event:null,eventEndsAt:0,offlineMultiplier:1,muted:false};let buildings=[];
-const fmt=n=>!Number.isFinite(n)?'$∞':n<1e6?'$'+Math.floor(n).toLocaleString():'$'+n.toExponential(2),fruit=()=>fruits[(state.evolution-1)%fruits.length],cash=()=>2**state.investors*20**state.prestige*(state.event?.multiplier||1),speed=()=>50**Math.max(0,state.evolution-1)*20**state.prestige;
-function cost(i){let n=BASE;for(let x=1;x<=i;x++)n=Math.min(MAX,Math.round(n*n));return n}function upgradeCost(id,i){return Math.min(MAX,Math.ceil(cost(defs.findIndex(d=>d[0]===id))*1.7**(i+1)))}
-function save(){state.lastSavedAt=Date.now();localStorage.setItem(KEY,JSON.stringify(state))}function load(){try{Object.assign(state,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}}
-function rebuild(){buildings=defs.map((d,i)=>{let saved=state.buildingStats[d[0]]||{};return{id:d[0],name:d[1],power:saved.power??d[2],interval:saved.interval??d[3],upgrades:saved.upgrades||{},cost:cost(i)}})}function persist(){state.buildingStats={};buildings.forEach(b=>state.buildingStats[b.id]={power:b.power,interval:b.interval,upgrades:b.upgrades})}
-function req(){let n=10;for(let i=1;i<state.evolution;i++)n=Math.ceil(n*1.5);return n}function msg(text){$('message').textContent=text;clearTimeout(msg.timer);msg.timer=setTimeout(()=>$('message').textContent='',2400)}
-function resetRun(){state.money=1;state.perClick=1;state.cooldown=250;state.lastClick=0;state.owned={};state.managers={};state.progress={};state.upgrades={};state.buildingStats={};state.combo=1;state.lastComboAt=0;state.clicks=0;state.totalEarned=0;state.event=null;state.eventEndsAt=0;rebuild();state.owned.stand=true;state.lastTick=Date.now()}
-function row(container,name,desc,price,owned,action){let r=document.createElement('div');r.className='row';r.innerHTML='<div class="info"><b>'+name+'</b><div class="small">'+desc+'</div>'+(owned?'<div class="owned">Owned</div>':'')+'</div>';let b=document.createElement('button');b.textContent=owned?'Owned':fmt(price);b.disabled=owned;if(!owned)b.onclick=action;r.append(b);container.append(r)}
-function renderGlobal(){let g=$('globalGrid');g.innerHTML='';[['click_power','Click Power','+$1000 per click',1200000,()=>state.perClick+=1000],['click_speed','Click Speed','Cooldown ×0.7',2000000,()=>state.cooldown=Math.max(30,state.cooldown*.7)],['offline','Offline Boost','+25% offline earnings',5000000,()=>state.offlineMultiplier*=1.25]].forEach(([id,n,d,p,a])=>row(g,n,d,p,!!state.upgrades[id],()=>{if(state.money<p)return;state.money-=p;state.upgrades[id]=1;a();save();render()}))}
-function renderManagers(){let g=$('managerGrid');g.innerHTML='';buildings.forEach(b=>row(g,b.name+' Manager','Automates '+b.name,b.cost,!!state.managers[b.id],()=>{if(state.money<b.cost)return;state.money-=b.cost;state.managers[b.id]=1;save();render()}))}
-function renderBuildingList(){let g=$('buildingGrid');g.innerHTML='';buildings.forEach(b=>{let r=document.createElement('div');r.className='row';r.innerHTML='<div class="info"><b>'+b.name+'</b><div class="small">10 building-specific upgrades</div></div>';let button=document.createElement('button');button.textContent='Open';button.onclick=()=>openBuildingScreen(b.id);r.append(button);g.append(r)})}
-function openBuildingScreen(id){$('upgradesScreen').classList.remove('open');$('buildingScreen').classList.add('open');renderBuildingScreen(id)}
-function renderBuildingScreen(id){let b=buildings.find(x=>x.id===id);if(!b)return;$('buildingTitle').textContent=b.name+' Upgrades';$('buildingMoney').textContent=fmt(state.money);let g=$('buildingUpgradeGrid');g.innerHTML='';effects.forEach((effect,i)=>{let owned=!!b.upgrades[i];row(g,'Upgrade '+(i+1),effect,upgradeCost(id,i),owned,()=>{let price=upgradeCost(id,i);if(state.money<price)return;state.money-=price;b.upgrades[i]=true;let n=+effect.match(/[0-9.]+/)[0];if(effect.includes('Power ×'))b.power*=n;else if(effect.includes('Power +'))b.power+=n;else b.interval=Math.max(.5,b.interval*n);persist();save();renderBuildingScreen(id);render()})})}
-function renderShop(){let g=$('shop');g.innerHTML='';buildings.forEach(b=>{let r=document.createElement('div');r.className='row';r.innerHTML='<div class="info"><b>'+b.name+'</b><div class="small">'+(state.owned[b.id]?'Owned':b.power+'/cycle every '+b.interval+'s')+'</div></div>';let button=document.createElement('button');button.textContent=state.owned[b.id]?'Owned':fmt(b.cost);button.disabled=!!state.owned[b.id];if(!state.owned[b.id])button.onclick=()=>{if(state.money<b.cost)return;state.money-=b.cost;state.owned[b.id]=true;state.progress[b.id]=0;save();render()};r.append(button);g.append(r)})}
-function collect(id){let b=buildings.find(x=>x.id===id),p=state.progress[id]||0;if(!b||!state.owned[id]||state.managers[id]||p<b.interval)return;let q=Math.floor(p/b.interval),gain=q*b.power*(state.event?.multiplier||1);state.money+=gain;state.totalEarned+=gain;state.collectibles+=q;state.progress[id]=p% b.interval;save();render()}
-function renderTimers(){let g=$('timers');g.innerHTML='';buildings.forEach(b=>{if(!state.owned[b.id])return;let p=state.progress[b.id]||0,r=document.createElement('div');r.className='panel';r.innerHTML='<b>'+b.name+'</b><div class="small">'+(state.managers[b.id]?'Automated':'Progress '+Math.floor(p)+'/'+b.interval+'s')+'</div><div class="progress"><span style="width:'+Math.min(100,p/b.interval*100)+'%"></span></div>'+(state.managers[b.id]?'':'<button data-id="'+b.id+'" style="width:100%">Collect</button>');g.append(r)});g.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>collect(b.dataset.id))}
-function renderGoals(){let q=$('quests'),a=$('achievements');q.innerHTML='';a.innerHTML='';[['clicks','Click 25 times',()=>state.clicks>=25],['money','Earn $1,000 total',()=>state.totalEarned>=1000],['upgrades','Buy 3 upgrades',()=>Object.keys(state.upgrades).length>=3],['investor','Buy an investor',()=>state.investors>=1]].forEach(([id,n,test])=>{let done=state.quests[id]||test();if(done&&!state.quests[id]){state.quests[id]=true;state.money+=250}q.innerHTML+='<div class="small">'+(done?'✅':'⬜')+' '+n+'</div>'});[['first','First click',()=>state.clicks>=1],['building','Own a building',()=>Object.values(state.owned).some(Boolean)],['evolve','Evolve once',()=>state.evolution>1],['prestige','Prestige once',()=>state.prestige>0],['all','Own all buildings',()=>buildings.every(b=>state.owned[b.id])]].forEach(([id,n,test])=>{let done=state.achievements[id]||test();if(done&&!state.achievements[id]){state.achievements[id]=true;state.money+=500}a.innerHTML+='<div class="small">'+(done?'🏆':'🔒')+' '+n+'</div>'})}
-function updateEvent(){if(state.event&&Date.now()>=state.eventEndsAt){state.event=null;state.eventEndsAt=0}let active=state.event;$('eventText').textContent=active?active.name+' ×'+active.multiplier+' active':'No event active';$('eventBar').style.width=active?Math.max(0,(state.eventEndsAt-Date.now())/300)+'%':'0%'}function maybeEvent(){if(state.event&&Date.now()<state.eventEndsAt)return;if(Math.random()<.12){let list=[['Golden Lemon',2.5],['Lemon Rush',3],['Fruit Festival',2],['Market Boom',1.8]],p=list[Math.floor(Math.random()*list.length)];state.event={name:p[0],multiplier:p[1]};state.eventEndsAt=Date.now()+30000;msg(p[0]+' started!')}}
-function render(){let f=fruit();document.documentElement.style.setProperty('--accent',f[1]);$('title').textContent=f[0]+' Clicker — Money';$('clicker').textContent=f[2];$('money').textContent=fmt(state.money);$('upgradeMoney').textContent=fmt(state.money);$('perClick').textContent='+$'+state.perClick;$('evolution').textContent=f[0];$('prestige').textContent=state.prestige;$('investors').textContent=state.investors;$('combo').textContent='Combo ×'+Math.max(1,state.combo)+' (no multiplier)';$('mps').textContent=Math.floor(buildings.reduce((n,b)=>n+(state.owned[b.id]&&state.managers[b.id]?b.power/(b.interval/speed()):0),0)*(state.event?.multiplier||1))+'/s';$('investorBtn').textContent='Buy Investor ('+fmt(100*2**state.investors)+')';$('evolutionBtn').textContent='Evolve ('+req()+' investors)';$('prestigeBtn').textContent='Prestige ('+fmt(state.prestigeCost)+')';$('muteBtn').textContent=state.muted?'🔇':'🔊';renderShop();renderTimers();renderGoals();renderGlobal();renderManagers();renderBuildingList();updateEvent()}
-function baseProduction(){return buildings.reduce((n,b)=>n+(state.owned[b.id]&&state.managers[b.id]?b.power/b.interval:0),0)}function offline(){let seconds=Math.min(14400,(Date.now()-(state.lastSavedAt||Date.now()))/1000),gain=baseProduction()*seconds*state.offlineMultiplier*.4;if(gain>0){state.money+=gain;msg('Offline earnings: '+fmt(gain));save()}}
-function tick(){maybeEvent();let now=Date.now(),dt=(now-state.lastTick)/1000;state.lastTick=now;buildings.forEach(b=>{if(!state.owned[b.id])return;let interval=b.interval/speed();state.progress[b.id]=(state.progress[b.id]||0)+dt;if(state.managers[b.id]){let q=Math.floor(state.progress[b.id]/interval);if(q){let gain=q*b.power*(state.event?.multiplier||1);state.money+=gain;state.totalEarned+=gain;state.progress[b.id]%=interval}}});render()}
-function wire(){
-$('clicker').onclick=e=>{let now=Date.now();if(now-state.lastClick<state.cooldown)return;state.lastClick=now;state.clicks++;state.combo=now-state.lastComboAt<1400?state.combo+1:1;state.lastComboAt=now;let gain=state.perClick*(state.event?.multiplier||1);state.money+=gain;state.totalEarned+=gain;let f=document.createElement('span');f.className='float';f.textContent='+'+fmt(gain);f.style.left=e.clientX+'px';f.style.top=e.clientY+'px';document.body.append(f);setTimeout(()=>f.remove(),1000);save();render()};
-$('investorBtn').onclick=()=>{let c=100*2**state.investors;if(state.money<c)return msg('Need '+fmt(c));state.money-=c;state.investors++;resetRun();state.investors++;state.investors--;save();render()};
-$('evolutionBtn').onclick=()=>{if(state.investors<req())return msg('Need '+req()+' investors');let next=state.evolution+1;resetRun();state.evolution=next;state.investors=0;save();render()};
-$('prestigeBtn').onclick=()=>{if(state.money<state.prestigeCost)return msg('Need '+fmt(state.prestigeCost));let next=state.prestige+1,c=state.prestigeCost;resetRun();state.prestige=next;state.prestigeCost=Math.ceil(c*1.6);state.evolution=1;state.investors=0;save();render()};
-$('upgradesBtn').onclick=()=>{$('upgradesScreen').classList.add('open');$('buildingScreen').classList.remove('open');render()};$('closeUpgrades').onclick=()=>$('upgradesScreen').classList.remove('open');$('backToUpgrades').onclick=()=>{$('buildingScreen').classList.remove('open');$('upgradesScreen').classList.add('open');render()};$('saveBtn').onclick=save;$('resetBtn').onclick=()=>{if(confirm('Reset save?')){localStorage.removeItem(KEY);location.reload()}};$('muteBtn').onclick=()=>{state.muted=!state.muted;save();render()}}
-load();state.owned??={};state.managers??={};state.progress??={};state.upgrades??={};state.buildingStats??={};state.achievements??={};state.quests??={};state.investors??=0;state.evolution??=1;state.prestige??=0;state.prestigeCost??=1e6;state.offlineMultiplier??=1;state.lastSavedAt??=Date.now();rebuild();buildings.forEach(b=>{state.owned[b.id]??=false;state.progress[b.id]??=0});if(!Object.values(state.owned).some(Boolean))state.owned.stand=true;offline();wire();render();setInterval(tick,1000)
-})();
-</script>
+  <div class="app">
+    <header class="topbar">
+      <h1 id="title">Lemon Clicker — Money</h1>
+      <div>
+        <button id="upgradesBtn">Upgrades</button>
+        <button id="muteBtn">🔊</button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside>
+        <div class="panel">
+          <h3>Building Timers</h3>
+          <div id="timers"></div>
+        </div>
+
+        <div class="panel" style="margin-top:16px;">
+          <h3>Quests</h3>
+          <div id="quests"></div>
+        </div>
+      </aside>
+
+      <main>
+        <div class="lemon-card">
+          <img id="fruitImage" alt="fruit background" src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80">
+          <div class="lemon-inner">
+            <button id="clicker">🍋</button>
+            <div id="perClick">+$1</div>
+            <div id="combo" class="combo">Combo ×1</div>
+          </div>
+        </div>
+        <div id="shop" class="shop"></div>
+
+        <div class="card" style="margin-top:16px;">
+          <div id="eventText" class="small">No event active</div>
+          <div class="progress-bar"><span id="eventBar"></span></div>
+        </div>
+      </main>
+
+      <aside>
+        <div class="stat-row"><span>Money</span><strong id="money">$0</strong></div>
+        <div class="stat-row"><span>Money / sec</span><strong id="mps">0/s</strong></div>
+        <div class="stat-row"><span>Evolution</span><strong id="evolution">1</strong></div>
+        <div class="stat-row"><span>Prestige</span><strong id="prestige">0</strong></div>
+        <div class="stat-row"><span>Investors</span><strong id="investors">0</strong></div>
+
+        <div class="panel" style="margin-top:14px;">
+          <button id="investorBtn" style="margin-right:6px;">Buy Investor</button>
+          <button id="evolutionBtn">Evolve</button>
+          <button id="prestigeBtn" style="margin-top:8px; width:100%;">Prestige</button>
+          <button id="saveBtn" style="margin-top:8px; width:100%;">Save</button>
+          <button id="resetBtn" style="margin-top:8px; width:100%;">Reset</button>
+          <div id="message" class="small" style="margin-top:8px; min-height: 18px;"></div>
+        </div>
+
+        <div class="panel" style="margin-top:14px;">
+          <h3>Achievements</h3>
+          <div id="achievements"></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <div id="upgradesScreen" class="screen">
+    <div class="screen-header">
+      <h2>Upgrades</h2>
+      <button id="closeUpgrades">Close</button>
+    </div>
+    <div class="screen-content">
+      <div class="money-banner"><span>Current Money</span><strong id="upgradeMoney">$0</strong></div>
+      <h3>Global Upgrades</h3>
+      <div id="globalUpgradeGrid" class="upgrade-grid"></div>
+      <h3>Manager Upgrades</h3>
+      <div id="managerGrid" class="upgrade-grid"></div>
+      <h3>Building Upgrades</h3>
+      <div id="buildingGrid" class="building-grid"></div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const SAVE_KEY = 'lemon_money_v2';
+      const MAX = 8.8e67;
+      const BASE_BUILDING_COST = 250;
+      const FRUITS = [
+        { name: 'Lemon', color: '#f6b93b', emoji: '🍋' },
+        { name: 'Orange', color: '#f28c28', emoji: '🍊' },
+        { name: 'Lime', color: '#a5f57a', emoji: '🍈' },
+        { name: 'Grapefruit', color: '#ff8fa3', emoji: '🍊' },
+        { name: 'Sour???', color: '#4caf50', emoji: '🍏' }
+      ];
+
+      const BUILDINGS = [
+        ['stand', 'Lemon Stand', 1, 5],
+        ['dash', 'Lemon Dash', 4, 4],
+        ['depot', 'Lemon Depot', 16, 12],
+        ['trading', 'Lemon Trading', 64, 10],
+        ['labs', 'Lemon Labs', 256, 8],
+        ['robotics', 'Lemon Robotics', 1024, 6],
+        ['republic', 'Lemon Republic', 4096, 14],
+        ['lemonx', 'LemonX', 16384, 20]
+      ];
+
+      const GLOBAL_UPGRADES = [
+        { id: 'click_power', name: 'Click Power', desc: '+1000 per click', cost: 1200000, apply: (state) => { state.perClick += 1000; } },
+        { id: 'click_speed', name: 'Click Speed', desc: 'Reduce click cooldown', cost: 2000000, apply: (state) => { state.cooldown = Math.max(30, Math.floor(state.cooldown * 0.7)); } },
+        { id: 'offline_boost', name: 'Offline Boost', desc: '+25% offline cash', cost: 5000000, apply: (state) => { state.offlineMultiplier = (state.offlineMultiplier || 1) * 1.25; } }
+      ];
+
+      const BUILDING_UPGRADE_EFFECTS = [
+        'Power ×2', 'Interval ×0.8', 'Power ×3', 'Power +20', 'Interval ×0.75', 'Power ×4', 'Power +50', 'Interval ×0.7'
+      ];
+
+      const state = {
+        money: 1,
+        perClick: 1,
+        cooldown: 250,
+        lastClick: 0,
+        owned: {},
+        managers: {},
+        progress: {},
+        upgrades: {},
+        buildingStats: {},
+        investors: 0,
+        evolution: 1,
+        prestige: 0,
+        prestigeCost: 1000000,
+        lastSavedAt: Date.now(),
+        lastTick: Date.now(),
+        combo: 1,
+        lastComboAt: 0,
+        clicks: 0,
+        totalEarned: 0,
+        collectibles: 0,
+        achievements: {},
+        quests: {},
+        event: null,
+        eventEndsAt: 0,
+        eventMultiplier: 1,
+        offlineMultiplier: 1,
+        muted: false,
+        moneyDisplay: '$0'
+      };
+
+      let buildings = [];
+
+      const fmt = (n) => {
+        if (!Number.isFinite(n)) return '$∞';
+        if (n < 1e6) return '$' + Math.floor(n).toLocaleString();
+        return '$' + n.toExponential(2);
+      };
+
+      function buildingCost(index) {
+        let cost = BASE_BUILDING_COST;
+        for (let i = 1; i <= index; i++) {
+          cost = Math.min(MAX, Math.round(cost * cost));
+        }
+        return cost;
+      }
+
+      function buildingUpgradeCost(buildingId, index) {
+        const buildingIndex = BUILDINGS.findIndex(([id]) => id === buildingId);
+        const base = buildingCost(buildingIndex);
+        return Math.min(MAX, Math.ceil(base * (1.7 ** (index + 1))));
+      }
+
+      function save() {
+        state.lastSavedAt = Date.now();
+        localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+      }
+
+      function load() {
+        try {
+          const raw = localStorage.getItem(SAVE_KEY);
+          if (!raw) return;
+          const saved = JSON.parse(raw);
+          Object.assign(state, saved);
+        } catch (err) {
+          console.warn('Save load failed:', err);
+        }
+      }
+
+      function getCurrentFruit() {
+        return FRUITS[(state.evolution - 1) % FRUITS.length];
+      }
+
+      function getEvolutionRequirement() {
+        let req = 10;
+        for (let i = 1; i < state.evolution; i++) req = Math.ceil(req * 1.5);
+        return req;
+      }
+
+      function syncBuildingData() {
+        buildings = BUILDINGS.map(([id, name, power, interval], idx) => ({
+          id,
+          name,
+          power: state.buildingStats[id]?.power ?? power,
+          interval: state.buildingStats[id]?.interval ?? interval,
+          cost: buildingCost(idx)
+        }));
+      }
+
+      function persistBuildings() {
+        state.buildingStats = {};
+        buildings.forEach((b) => {
+          state.buildingStats[b.id] = { power: b.power, interval: b.interval };
+        });
+      }
+
+      function baseProductionPerSecond() {
+        return buildings.reduce((total, b) => {
+          if (!state.owned[b.id]) return total;
+          if (state.managers[b.id]) return total + (b.power / b.interval);
+          return total;
+        }, 0);
+      }
+
+      function eventMultiplier() {
+        let mult = 1;
+        if (state.event) mult *= state.event.multiplier;
+        return mult;
+      }
+
+      function ghostText(text, x, y) {
+        const el = document.createElement('div');
+        el.className = 'floating-text';
+        el.textContent = text;
+        el.style.left = x + 'px';
+        el.style.top = y + 'px';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1000);
+      }
+
+      function message(text) {
+        const el = document.getElementById('message');
+        el.textContent = text;
+        clearTimeout(message.timeout);
+        message.timeout = setTimeout(() => { el.textContent = ''; }, 2200);
+      }
+
+      function setEvent() {
+        if (state.event && Date.now() < state.eventEndsAt) return;
+        if (Math.random() < 0.15 || state.event === null) {
+          const events = [
+            { name: 'Golden Lemon', multiplier: 2.5 },
+            { name: 'Lemon Rush', multiplier: 3 },
+            { name: 'Fruit Festival', multiplier: 2 },
+            { name: 'Market Boom', multiplier: 1.8 }
+          ];
+          const pick = events[Math.floor(Math.random() * events.length)];
+          state.event = pick;
+          state.eventEndsAt = Date.now() + 30000;
+          state.eventMultiplier = pick.multiplier;
+          message(pick.name + ' started!');
+        } else {
+          state.event = null;
+          state.eventMultiplier = 1;
+        }
+      }
+
+      function resetRun() {
+        state.money = 1;
+        state.perClick = 1;
+        state.cooldown = 250;
+        state.lastClick = 0;
+        state.owned = {};
+        state.managers = {};
+        state.progress = {};
+        state.upgrades = {};
+        state.buildingStats = {};
+        state.combo = 1;
+        state.lastComboAt = 0;
+        state.clicks = 0;
+        state.totalEarned = 0;
+        state.event = null;
+        state.eventEndsAt = 0;
+        state.eventMultiplier = 1;
+        syncBuildingData();
+        state.owned.stand = true;
+      }
+
+      function buyBuilding(id) {
+        const b = buildings.find((x) => x.id === id);
+        if (!b) return;
+        if (state.money >= b.cost) {
+          state.money -= b.cost;
+          state.owned[id] = true;
+          state.progress[id] = 0;
+          save();
+          render();
+        }
+      }
+
+      function collectBuilding(id) {
+        const b = buildings.find((x) => x.id === id);
+        if (!b || !state.owned[id] || state.managers[id]) return;
+        const current = state.progress[id] || 0;
+        if (current < b.interval) return;
+        const earned = Math.floor(current / b.interval) * b.power * eventMultiplier();
+        state.money += earned;
+        state.totalEarned += earned;
+        state.collectibles += Math.floor(current / b.interval);
+        state.progress[id] = current % b.interval;
+        save();
+        render();
+      }
+
+      function globalUpgradeBuy(entry) {
+        if (state.money < entry.cost) return;
+        if (state.upgrades[entry.id]) return;
+        state.money -= entry.cost;
+        state.upgrades[entry.id] = true;
+        entry.apply(state);
+        save();
+        render();
+      }
+
+      function managerBuy(id, cost) {
+        if (state.money < cost) return;
+        if (state.managers[id]) return;
+        state.money -= cost;
+        state.managers[id] = true;
+        save();
+        render();
+      }
+
+      function addUpgradeRow(container, name, desc, cost, owned, onBuy) {
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.innerHTML = '<div class="info"><b>' + name + '</b><div class="small">' + desc + '</div>' + (owned ? '<div class="owned">Owned</div>' : '') + '</div>';
+        const button = document.createElement('button');
+        button.textContent = owned ? 'Owned' : fmt(cost);
+        button.disabled = owned;
+        button.onclick = () => onBuy();
+        row.appendChild(button);
+        container.appendChild(row);
+      }
+
+      function renderGlobalUpgrades() {
+        const grid = document.getElementById('globalUpgradeGrid');
+        grid.innerHTML = '';
+        GLOBAL_UPGRADES.forEach((entry) => {
+          const owned = !!state.upgrades[entry.id];
+          addUpgradeRow(grid, entry.name, entry.desc, entry.cost, owned, () => globalUpgradeBuy(entry));
+        });
+      }
+
+      function renderManagerUpgrades() {
+        const grid = document.getElementById('managerGrid');
+        grid.innerHTML = '';
+        buildings.forEach((b) => {
+          const owned = !!state.managers[b.id];
+          addUpgradeRow(grid, b.name + ' Manager', 'Automates ' + b.name, b.cost, owned, () => managerBuy(b.id, b.cost));
+        });
+      }
+
+      function renderBuildingUpgradeList() {
+        const grid = document.getElementById('buildingGrid');
+        grid.innerHTML = '';
+        buildings.forEach((b) => {
+          const row = document.createElement('div');
+          row.className = 'row';
+          row.innerHTML = '<div class="info"><b>' + b.name + '</b><div class="small">View upgrades</div></div>';
+          const button = document.createElement('button');
+          button.textContent = 'Open';
+          button.onclick = () => renderBuildingScreen(b.id);
+          row.appendChild(button);
+          grid.appendChild(row);
+        });
+      }
+
+      function renderBuildingScreen(id) {
+        const b = buildings.find((x) => x.id === id);
+        if (!b) return;
+        const panel = document.getElementById('buildingGrid');
+        panel.innerHTML = '';
+        panel.style.gridTemplateColumns = '1fr';
+        const title = document.createElement('div');
+        title.className = 'money-banner';
+        title.innerHTML = '<span>' + b.name + ' Upgrades</span><button id="backToBuildings">Back</button>';
+        title.querySelector('button').onclick = () => {
+          renderBuildingUpgradeList();
+        };
+        panel.appendChild(title);
+
+        BUILDING_UPGRADE_EFFECTS.forEach((effect, index) => {
+          const owned = !!state.buildingStats[id]?.upgrades?.[index];
+          const cost = buildingUpgradeCost(id, index);
+          addUpgradeRow(panel, 'Upgrade ' + (index + 1), effect, cost, owned, () => {
+            if (state.money < cost || owned) return;
+            state.money -= cost;
+            const entry = state.buildingStats[id] || {};
+            entry.upgrades = entry.upgrades || {};
+            entry.upgrades[index] = true;
+            state.buildingStats[id] = entry;
+            const target = buildings.find((x) => x.id === id);
+            const match = effect.match(/\d+(?:\.\d+)?/);
+            const amt = match ? Number(match[0]) : 1;
+            if (effect.includes('Power')) {
+              target.power *= effect.includes('×') ? amt : 1 + amt / 100;
+            }
+            if (effect.includes('Interval')) {
+              target.interval = Math.max(0.5, target.interval * (effect.includes('×') ? amt : 1 - amt / 100));
+            }
+            persistBuildings();
+            save();
+            render();
+          });
+        });
+      }
+
+      function renderShop() {
+        const el = document.getElementById('shop');
+        el.innerHTML = '';
+        buildings.forEach((b) => {
+          const row = document.createElement('div');
+          row.className = 'row';
+          row.innerHTML = '<div class="info"><b>' + b.name + '</b><div class="small">' + (state.owned[b.id] ? 'Owned' : 'One-time purchase') + ' · ' + b.power + '/cycle</div></div>';
+          const button = document.createElement('button');
+          button.textContent = state.owned[b.id] ? 'Owned' : fmt(b.cost);
+          button.disabled = !!state.owned[b.id];
+          button.onclick = () => buyBuilding(b.id);
+          row.appendChild(button);
+          el.appendChild(row);
+        });
+      }
+
+      function renderTimers() {
+        const el = document.getElementById('timers');
+        el.innerHTML = '';
+        buildings.forEach((b) => {
+          if (!state.owned[b.id]) return;
+          const p = state.progress[b.id] || 0;
+          const row = document.createElement('div');
+          row.className = 'panel';
+          row.style.marginTop = '8px';
+          row.innerHTML = '<div><b>' + b.name + '</b></div><div class="small">' + (state.managers[b.id] ? 'Automated' : 'Progress: ' + Math.floor(p) + '/' + b.interval + 's') + '</div>' +
+            '<div class="progress-bar"><span style="width:' + Math.min(100, p / b.interval * 100) + '%"></span></div>' +
+            (state.managers[b.id] ? '' : '<button data-id="' + b.id + '" style="width:100%; margin-top:6px;">Collect</button>');
+          el.appendChild(row);
+        });
+
+        el.querySelectorAll('[data-id]').forEach((button) => {
+          button.onclick = () => collectBuilding(button.dataset.id);
+        });
+      }
+
+      function renderAchievements() {
+        const container = document.getElementById('achievements');
+        const defs = [
+          ['first_click', 'First click', () => state.clicks >= 1],
+          ['own_building', 'Own a building', () => Object.values(state.owned).some(Boolean)],
+          ['cash_1000', 'Reach $1,000', () => state.money >= 1000],
+          ['investor', 'Buy an investor', () => state.investors >= 1],
+          ['evolve', 'Evolve once', () => state.evolution >= 2],
+          ['prestige', 'Prestige once', () => state.prestige >= 1],
+          ['all_buildings', 'Own all buildings', () => BUILDINGS.every(([id]) => !!state.owned[id])]
+        ];
+
+        container.innerHTML = '';
+        defs.forEach(([id, label, check]) => {
+          const unlocked = state.achievements[id] || check();
+          if (unlocked && !state.achievements[id]) {
+            state.achievements[id] = true;
+            state.money += 500;
+            message(label + ' unlocked!');
+          }
+          const row = document.createElement('div');
+          row.className = 'small';
+          row.textContent = (unlocked ? '✅' : '⬜') + ' ' + label;
+          container.appendChild(row);
+        });
+      }
+
+      function renderQuests() {
+        const container = document.getElementById('quests');
+        const defs = [
+          ['click_25', 'Click 25 times', () => state.clicks >= 25],
+          ['money_1k', 'Earn $1,000 total', () => state.totalEarned >= 1000],
+          ['upgrade_3', 'Buy 3 upgrades', () => Object.keys(state.upgrades).length >= 3],
+          ['investor_1', 'Buy 1 investor', () => state.investors >= 1]
+        ];
+
+        container.innerHTML = '';
+        defs.forEach(([id, label, check]) => {
+          const done = state.quests[id] || check();
+          if (done && !state.quests[id]) {
+            state.quests[id] = true;
+            state.money += 250;
+            message(label + ' complete!');
+          }
+          const row = document.createElement('div');
+          row.className = 'small';
+          row.textContent = (done ? '✅' : '⬜') + ' ' + label;
+          container.appendChild(row);
+        });
+      }
+
+      function updateEventDisplay() {
+        const text = document.getElementById('eventText');
+        const bar = document.getElementById('eventBar');
+        if (!state.event || Date.now() >= state.eventEndsAt) {
+          state.event = null;
+          state.eventMultiplier = 1;
+          text.textContent = 'No event active';
+          bar.style.width = '0%';
+          return;
+        }
+        const remaining = Math.max(0, (state.eventEndsAt - Date.now()) / 30000);
+        text.textContent = state.event.name + ' ×' + state.event.multiplier + ' active';
+        bar.style.width = (remaining * 100) + '%';
+      }
+
+      function render() {
+        const fruit = getCurrentFruit();
+        document.documentElement.style.setProperty('--accent', fruit.color);
+        document.getElementById('title').textContent = fruit.name + ' Clicker — Money';
+        document.getElementById('clicker').textContent = fruit.emoji;
+        document.getElementById('money').textContent = fmt(state.money);
+        document.getElementById('mps').textContent = Math.floor(baseProductionPerSecond() * eventMultiplier()) + '/s';
+        document.getElementById('perClick').textContent = '+$' + state.perClick;
+        document.getElementById('evolution').textContent = fruit.name;
+        document.getElementById('prestige').textContent = state.prestige;
+        document.getElementById('investors').textContent = state.investors;
+        document.getElementById('upgradeMoney').textContent = fmt(state.money);
+        document.getElementById('combo').textContent = 'Combo ×' + Math.max(1, state.combo);
+        document.getElementById('investorBtn').textContent = 'Buy Investor (' + fmt(100 * (2 ** state.investors)) + ')';
+        document.getElementById('evolutionBtn').textContent = 'Evolve (' + getEvolutionRequirement() + ' investors)';
+        document.getElementById('prestigeBtn').textContent = 'Prestige (' + fmt(state.prestigeCost) + ')';
+        document.getElementById('muteBtn').textContent = state.muted ? '🔇' : '🔊';
+        renderShop();
+        renderTimers();
+        renderAchievements();
+        renderQuests();
+        renderGlobalUpgrades();
+        renderManagerUpgrades();
+        renderBuildingUpgradeList();
+        updateEventDisplay();
+      }
+
+      function tick() {
+        setEvent();
+        const now = Date.now();
+        const delta = (now - state.lastTick) / 1000;
+        state.lastTick = now;
+
+        buildings.forEach((b) => {
+          if (!state.owned[b.id]) return;
+          state.progress[b.id] = (state.progress[b.id] || 0) + delta;
+          if (state.managers[b.id]) {
+            const interval = b.interval;
+            const cycles = Math.floor(state.progress[b.id] / interval);
+            if (cycles > 0) {
+              const profit = cycles * b.power * eventMultiplier();
+              state.money += profit;
+              state.totalEarned += profit;
+              state.progress[b.id] %= interval;
+            }
+          }
+        });
+
+        render();
+      }
+
+      function applyOfflineEarnings() {
+        const now = Date.now();
+        const seconds = Math.min(4 * 60 * 60, (now - (state.lastSavedAt || now)) / 1000);
+        if (seconds <= 0) return;
+        const hourlyBase = baseProductionPerSecond();
+        const offline = hourlyBase * seconds * state.offlineMultiplier * 0.4;
+        if (offline > 0) {
+          state.money += offline;
+          message('Offline earnings: ' + fmt(offline));
+        }
+      }
+
+      function initAudio() {
+        if (!window.AudioContext && !window.webkitAudioContext) return null;
+        return new (window.AudioContext || window.webkitAudioContext)();
+      }
+
+      let audioCtx = null;
+      function playTone(freq, duration = 0.08, type = 'sine') {
+        if (state.muted) return;
+        if (!audioCtx) audioCtx = initAudio();
+        if (!audioCtx) return;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.06, audioCtx.currentTime + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      }
+
+      function buyInvestor() {
+        const cost = 100 * (2 ** state.investors);
+        if (state.money < cost) {
+          message('Need ' + fmt(cost));
+          return;
+        }
+        state.money -= cost;
+        state.investors += 1;
+        playTone(660, 0.12, 'triangle');
+        save();
+        render();
+      }
+
+      function evolve() {
+        if (state.investors < getEvolutionRequirement()) {
+          message('Need ' + getEvolutionRequirement() + ' investors');
+          return;
+        }
+        state.evolution += 1;
+        state.investors = 0;
+        resetRun();
+        state.evolution = Math.max(1, state.evolution);
+        playTone(880, 0.14, 'square');
+        save();
+        render();
+      }
+
+      function prestige() {
+        if (state.money < state.prestigeCost) {
+          message('Need ' + fmt(state.prestigeCost));
+          return;
+        }
+        state.money -= state.prestigeCost;
+        state.prestige += 1;
+        state.prestigeCost = Math.min(MAX, Math.ceil(state.prestigeCost * 1.6));
+        resetRun();
+        state.prestige = Math.max(0, state.prestige);
+        playTone(1040, 0.16, 'sawtooth');
+        save();
+        render();
+      }
+
+      function registerEvents() {
+        document.getElementById('clicker').onclick = (e) => {
+          const now = Date.now();
+          if (now - state.lastClick < state.cooldown) return;
+          state.lastClick = now;
+          state.clicks += 1;
+          const comboWindow = 1400;
+          if (now - state.lastComboAt < comboWindow) state.combo += 1;
+          else state.combo = 1;
+          state.lastComboAt = now;
+          const gain = state.perClick * state.combo * state.eventMultiplier * (1 + state.prestige * 0.2);
+          state.money += gain;
+          state.totalEarned += gain;
+          ghostText('+' + fmt(gain), e.clientX, e.clientY);
+          playTone(520 + state.combo * 20, 0.08, 'triangle');
+          save();
+          render();
+        };
+
+        document.getElementById('saveBtn').onclick = save;
+        document.getElementById('resetBtn').onclick = () => {
+          if (confirm('Reset save?')) {
+            localStorage.removeItem(SAVE_KEY);
+            location.reload();
+          }
+        };
+        document.getElementById('investorBtn').onclick = buyInvestor;
+        document.getElementById('evolutionBtn').onclick = evolve;
+        document.getElementById('prestigeBtn').onclick = prestige;
+        document.getElementById('upgradesBtn').onclick = () => {
+          document.getElementById('upgradesScreen').classList.add('open');
+          renderGlobalUpgrades();
+          renderManagerUpgrades();
+          renderBuildingUpgradeList();
+        };
+        document.getElementById('closeUpgrades').onclick = () => {
+          document.getElementById('upgradesScreen').classList.remove('open');
+        };
+        document.getElementById('muteBtn').onclick = () => {
+          state.muted = !state.muted;
+          save();
+          render();
+        };
+      }
+
+      function init() {
+        load();
+        syncBuildingData();
+        if (!Object.keys(state.owned).length) state.owned.stand = true;
+        if (!state.buildingStats || Object.keys(state.buildingStats).length === 0) persistBuildings();
+        if (!state.offlineMultiplier) state.offlineMultiplier = 1;
+        registerEvents();
+        applyOfflineEarnings();
+        render();
+        setInterval(tick, 1000);
+        setInterval(() => setEvent(), 15000);
+      }
+
+      init();
+    })();
+  </script>
 </body>
 </html>
