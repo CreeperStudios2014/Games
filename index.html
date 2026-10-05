@@ -27,7 +27,7 @@
     .app { max-width: 100vw; height: 100vh; display: flex; flex-direction: column; padding: 12px; }
     .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-shrink: 0; }
     .topbar h1 { margin: 0; font-size: 1.2rem; }
-    .main-content { display: grid; grid-template-columns: 140px 1fr 140px 180px; gap: 12px; flex: 1; min-height: 0; }
+    .main-content { display: grid; grid-template-columns: 140px 1fr 140px 180px; gap: 12px; flex: 1; min-height: 0; overflow: hidden; }
     .panel { background: var(--panel); border-radius: 12px; padding: 10px; font-size: 0.85rem; overflow-y: auto; }
     .panel h3, .panel h4 { margin: 0 0 8px; font-size: 0.95rem; }
     .panel h3 { margin-top: 10px; margin-bottom: 6px; }
@@ -58,14 +58,15 @@
     .owned { color: var(--good); font-weight: 700; }
     .screen {
       position: fixed; inset: 0; display: none; background: rgba(8,18,24,0.95); z-index: 20; padding: 20px;
-      overflow: auto;
+      overflow-y: auto; overflow-x: hidden;
     }
-    .screen.open { display: block; }
-    .screen-header { margin: 0 0 16px; display: flex; justify-content: space-between; align-items: center; }
+    .screen.open { display: flex; flex-direction: column; }
+    .screen-header { margin: 0 0 16px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
     .screen-header h2 { margin: 0; }
+    .screen-content { flex: 1; overflow-y: auto; }
     .money-banner {
       display: flex; justify-content: space-between; align-items: center; gap: 12px;
-      background: var(--panel); border-radius: 10px; padding: 12px 14px; font-size: 1.1rem; margin-bottom: 18px;
+      background: var(--panel); border-radius: 10px; padding: 12px 14px; font-size: 1.1rem; margin-bottom: 18px; flex-shrink: 0;
     }
     .progress-bar { height: 8px; background: rgba(255,255,255,.08); border-radius: 999px; overflow: hidden; margin: 8px 0; }
     .progress-bar > span { display: block; height: 100%; width: 0; background: var(--accent); }
@@ -105,7 +106,7 @@
         </div>
       </aside>
 
-      <main style="display: flex; flex-direction: column; gap: 12px;">
+      <main style="display: flex; flex-direction: column; gap: 12px; overflow: hidden;">
         <div class="lemon-card">
           <img id="fruitImage" alt="fruit background" src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80">
           <div class="lemon-inner">
@@ -114,8 +115,8 @@
             <div id="combo" class="combo">Combo ×1</div>
           </div>
         </div>
-        <div style="display: flex; gap: 12px;">
-          <div style="flex: 1;">
+        <div style="display: flex; gap: 12px; overflow: hidden;">
+          <div style="flex: 1; min-height: 0;">
             <div class="juice-tank">
               <div class="juice-fill" id="juiceFill"></div>
               <div class="juice-label" id="juiceLabel">Juice 0%</div>
@@ -124,7 +125,7 @@
               <span>Juice Multiplier: <strong id="juiceMultiplier">1.00x</strong></span>
             </div>
           </div>
-          <div id="shop" class="shop"></div>
+          <div id="shop" class="shop" style="max-height: 160px; overflow-y: auto;"></div>
         </div>
       </main>
 
@@ -167,13 +168,15 @@
       <h2>Upgrades</h2>
       <button id="closeUpgrades">Close</button>
     </div>
-    <div class="money-banner"><span>Current Money</span><strong id="upgradeMoney">$0</strong></div>
-    <h3>Global Upgrades</h3>
-    <div id="globalUpgradeGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; margin-bottom: 20px;"></div>
-    <h3>Manager Upgrades</h3>
-    <div id="managerGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; margin-bottom: 20px;"></div>
-    <h3>Building Upgrades</h3>
-    <div id="buildingGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px;"></div>
+    <div class="screen-content">
+      <div class="money-banner"><span>Current Money</span><strong id="upgradeMoney">$0</strong></div>
+      <h3>Global Upgrades</h3>
+      <div id="globalUpgradeGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; margin-bottom: 20px;"></div>
+      <h3>Manager Upgrades</h3>
+      <div id="managerGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; margin-bottom: 20px;"></div>
+      <h3>Building Upgrades</h3>
+      <div id="buildingGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px;"></div>
+    </div>
   </div>
 
   <script>
@@ -337,7 +340,7 @@
     }, 0);
   }
 
-  function eventMultiplier() {
+  function getCurrentEventMultiplier() {
     let mult = 1;
     if (state.event) mult *= state.event.multiplier;
     return mult;
@@ -429,7 +432,7 @@
     if (!b || !state.owned[id] || state.managers[id]) return;
     const current = state.progress[id] || 0;
     if (current < b.interval) return;
-    const earned = Math.floor(current / b.interval) * b.power * eventMultiplier();
+    const earned = Math.floor(current / b.interval) * b.power * getCurrentEventMultiplier();
     state.money += earned;
     state.totalEarned += earned;
     state.collectibles += Math.floor(current / b.interval);
@@ -583,7 +586,7 @@
     
     const achievements = [
       { label: 'Clicks', key: 'clicks', data: ACHIEVEMENT_MILESTONES.clicks, current: state.clicks },
-      { label: 'MPS', key: 'mps', data: ACHIEVEMENT_MILESTONES.mps, current: Math.floor(baseProductionPerSecond() * eventMultiplier()) },
+      { label: 'MPS', key: 'mps', data: ACHIEVEMENT_MILESTONES.mps, current: Math.floor(baseProductionPerSecond() * getCurrentEventMultiplier()) },
       { label: 'Total $', key: 'totalMoney', data: ACHIEVEMENT_MILESTONES.totalMoney, current: state.totalEarned },
       { label: 'Investors', key: 'investors', data: ACHIEVEMENT_MILESTONES.investors, current: state.totalInvestorsEver },
       { label: 'Evolves', key: 'evolves', data: ACHIEVEMENT_MILESTONES.evolves, current: state.totalEvolvesEver },
@@ -605,6 +608,7 @@
       container.appendChild(row);
     });
 
+    // Check and unlock achievements
     ACHIEVEMENT_MILESTONES.clicks.forEach((milestone) => {
       const id = 'clicks_' + milestone;
       if (!state.achievements[id] && state.clicks >= milestone) {
@@ -617,7 +621,7 @@
 
     ACHIEVEMENT_MILESTONES.mps.forEach((milestone) => {
       const id = 'mps_' + milestone;
-      if (!state.achievements[id] && Math.floor(baseProductionPerSecond() * eventMultiplier()) >= milestone) {
+      if (!state.achievements[id] && Math.floor(baseProductionPerSecond() * getCurrentEventMultiplier()) >= milestone) {
         state.achievements[id] = true;
         state.juice += 1;
         updateJuiceMultiplier();
@@ -722,7 +726,7 @@
     document.getElementById('title').textContent = fruit.name + ' Clicker — Money';
     document.getElementById('clicker').textContent = fruit.emoji;
     document.getElementById('money').textContent = fmt(state.money);
-    document.getElementById('mps').textContent = Math.floor(baseProductionPerSecond() * eventMultiplier()) + '/s';
+    document.getElementById('mps').textContent = Math.floor(baseProductionPerSecond() * getCurrentEventMultiplier()) + '/s';
     document.getElementById('perClick').textContent = '+$' + Math.floor(state.perClick * state.juiceMultiplier) + ' (×' + state.juiceMultiplier.toFixed(2) + ')';
     document.getElementById('evolution').textContent = fruit.name;
     document.getElementById('prestige').textContent = state.prestige;
@@ -757,7 +761,7 @@
         const interval = b.interval;
         const cycles = Math.floor(state.progress[b.id] / interval);
         if (cycles > 0) {
-          const profit = cycles * b.power * eventMultiplier();
+          const profit = cycles * b.power * getCurrentEventMultiplier();
           state.money += profit;
           state.totalEarned += profit;
           state.progress[b.id] %= interval;
@@ -894,7 +898,7 @@
         if (now - state.lastComboAt < comboWindow) state.combo += 1;
         else state.combo = 1;
         state.lastComboAt = now;
-        const gain = state.perClick * state.combo * state.eventMultiplier * state.juiceMultiplier * (1 + state.prestige * 0.2);
+        const gain = state.perClick * state.combo * getCurrentEventMultiplier() * state.juiceMultiplier * (1 + state.prestige * 0.2);
         state.money += gain;
         state.totalEarned += gain;
         ghostText('+' + fmt(gain), e.clientX, e.clientY);
@@ -941,28 +945,7 @@
     }
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() {
-      load();
-      syncBuildingData();
-      if (!Object.keys(state.owned).length) state.owned.stand = true;
-      if (!state.buildingStats || Object.keys(state.buildingStats).length === 0) persistBuildings();
-      if (!state.offlineMultiplier) state.offlineMultiplier = 1;
-      if (state.juice === undefined) state.juice = 0;
-      if (state.juiceMultiplier === undefined) state.juiceMultiplier = 1;
-      if (state.investorMultiplier === undefined) state.investorMultiplier = 1;
-      if (state.evolveMultiplier === undefined) state.evolveMultiplier = 1;
-      if (state.totalInvestorsEver === undefined) state.totalInvestorsEver = 0;
-      if (state.totalEvolvesEver === undefined) state.totalEvolvesEver = 0;
-      if (state.totalPrestigesEver === undefined) state.totalPrestigesEver = 0;
-      updateJuiceMultiplier();
-      registerEvents();
-      applyOfflineEarnings();
-      render();
-      setInterval(tick, 1000);
-      setInterval(() => setEvent(), 15000);
-    });
-  } else {
+  function initGame() {
     load();
     syncBuildingData();
     if (!Object.keys(state.owned).length) state.owned.stand = true;
@@ -981,6 +964,12 @@
     render();
     setInterval(tick, 1000);
     setInterval(() => setEvent(), 15000);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGame);
+  } else {
+    initGame();
   }
 </script>
 </body>
