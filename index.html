@@ -245,7 +245,9 @@
   function save() {
     state.lastSavedAt = Date.now();
     try {
-      localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+      if (window.localStorage) {
+        localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+      }
     } catch (err) {
       console.warn('Save failed:', err);
     }
@@ -253,10 +255,12 @@
 
   function load() {
     try {
-      const raw = localStorage.getItem(SAVE_KEY);
-      if (!raw) return;
-      const saved = JSON.parse(raw);
-      Object.assign(state, saved);
+      if (window.localStorage) {
+        const raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        Object.assign(state, saved);
+      }
     } catch (err) {
       console.warn('Save load failed:', err);
     }
@@ -719,6 +723,29 @@
     render();
   }
 
+  function handleReset() {
+    if (confirm('Reset save?')) {
+      try {
+        if (window.localStorage) {
+          localStorage.removeItem(SAVE_KEY);
+        }
+      } catch (err) {
+        console.warn('Reset failed:', err);
+      }
+      resetRun();
+      state.evolution = 1;
+      state.prestige = 0;
+      state.prestigeCost = 1000000;
+      state.clicks = 0;
+      state.totalEarned = 0;
+      state.collectibles = 0;
+      state.achievements = {};
+      state.quests = {};
+      save();
+      render();
+    }
+  }
+
   // Register all event listeners
   function registerEvents() {
     // Clicker
@@ -784,14 +811,7 @@
     }
     // Reset
     if (document.getElementById('resetBtn')) {
-      document.getElementById('resetBtn').onclick = function() {
-        if (confirm('Reset save?')) {
-          try {
-            localStorage.removeItem(SAVE_KEY);
-          } catch (err) {}
-          location.reload();
-        }
-      };
+      document.getElementById('resetBtn').onclick = handleReset;
     }
   }
 
@@ -810,7 +830,6 @@
       setInterval(() => setEvent(), 15000);
     });
   } else {
-    // DOM is already loaded
     load();
     syncBuildingData();
     if (!Object.keys(state.owned).length) state.owned.stand = true;
