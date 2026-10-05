@@ -27,7 +27,7 @@
     .app { max-width: 100vw; height: 100vh; display: flex; flex-direction: column; padding: 12px; }
     .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-shrink: 0; }
     .topbar h1 { margin: 0; font-size: 1.2rem; }
-    .main-content { display: grid; grid-template-columns: 140px 1fr 140px 200px; gap: 12px; flex: 1; min-height: 0; }
+    .main-content { display: grid; grid-template-columns: 140px 1fr 140px 180px; gap: 12px; flex: 1; min-height: 0; }
     .panel { background: var(--panel); border-radius: 12px; padding: 10px; font-size: 0.85rem; overflow-y: auto; }
     .panel h3, .panel h4 { margin: 0 0 8px; font-size: 0.95rem; }
     .panel h3 { margin-top: 10px; margin-bottom: 6px; }
@@ -49,7 +49,6 @@
     }
     .juice-fill { position: absolute; bottom: 0; width: 100%; height: 0%; background: var(--accent); transition: height 0.3s ease; }
     .juice-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; font-weight: 700; font-size: 0.9rem; text-shadow: 0 0 4px rgba(0,0,0,0.8); }
-    .upgrades-panel { display: flex; flex-direction: column; gap: 8px; font-size: 0.8rem; }
     .upgrade-btn { padding: 6px 8px; font-size: 0.75rem; }
     .shop { display: grid; gap: 6px; }
     .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--panel-strong); border-radius: 8px; padding: 8px; font-size: 0.8rem; }
@@ -156,8 +155,8 @@
           <h3>Events</h3>
           <div id="eventText" class="small">No event</div>
           <div class="progress-bar"><span id="eventBar"></span></div>
-          <h3>Streaks</h3>
-          <div id="achievements" style="font-size: 0.75rem;"></div>
+          <h3>Achievements</h3>
+          <div id="achievements" style="font-size: 0.7rem;"></div>
         </div>
       </aside>
     </div>
@@ -213,7 +212,14 @@
     'Power ×2', 'Interval ×0.8', 'Power ×3', 'Power +20', 'Interval ×0.75', 'Power ×4', 'Power +50', 'Interval ×0.7'
   ];
 
-  const STREAK_MILESTONES = [10, 25, 50, 100, 200, 300, 400, 500, 750, 1000];
+  const ACHIEVEMENT_MILESTONES = {
+    clicks: [10, 25, 50, 100, 200, 300, 400, 500, 750, 1000],
+    mps: [1, 10, 100, 1000, 10000],
+    totalMoney: [1000, 10000, 100000, 1000000, 10000000],
+    investors: [1, 5, 10, 25, 50],
+    evolves: [1, 2, 3, 5, 10],
+    ascends: [1, 2, 3, 5, 10]
+  };
 
   const state = {
     money: 1,
@@ -242,9 +248,14 @@
     eventEndsAt: 0,
     eventMultiplier: 1,
     offlineMultiplier: 1,
+    investorMultiplier: 1,
+    evolveMultiplier: 1,
     muted: false,
     juice: 0,
-    juiceMultiplier: 1
+    juiceMultiplier: 1,
+    totalInvestorsEver: 0,
+    totalEvolvesEver: 0,
+    totalPrestigesEver: 0
   };
 
   function fmt(n) {
@@ -333,7 +344,7 @@
   }
 
   function getJuiceMultiplier() {
-    const maxJuice = STREAK_MILESTONES[STREAK_MILESTONES.length - 1];
+    const maxJuice = ACHIEVEMENT_MILESTONES.clicks[ACHIEVEMENT_MILESTONES.clicks.length - 1];
     const ratio = Math.min(1, state.juice / maxJuice);
     return 1 + ratio * 1.5;
   }
@@ -569,19 +580,89 @@
   function renderAchievements() {
     const container = document.getElementById('achievements');
     container.innerHTML = '';
-    STREAK_MILESTONES.forEach((milestone) => {
-      const id = 'streak_' + milestone;
-      const unlocked = state.achievements[id] || state.clicks >= milestone;
-      if (unlocked && !state.achievements[id]) {
+    
+    const achievements = [
+      { label: 'Clicks', key: 'clicks', data: ACHIEVEMENT_MILESTONES.clicks, current: state.clicks },
+      { label: 'MPS', key: 'mps', data: ACHIEVEMENT_MILESTONES.mps, current: Math.floor(baseProductionPerSecond() * eventMultiplier()) },
+      { label: 'Total $', key: 'totalMoney', data: ACHIEVEMENT_MILESTONES.totalMoney, current: state.totalEarned },
+      { label: 'Investors', key: 'investors', data: ACHIEVEMENT_MILESTONES.investors, current: state.totalInvestorsEver },
+      { label: 'Evolves', key: 'evolves', data: ACHIEVEMENT_MILESTONES.evolves, current: state.totalEvolvesEver },
+      { label: 'Ascends', key: 'ascends', data: ACHIEVEMENT_MILESTONES.ascends, current: state.totalPrestigesEver }
+    ];
+
+    achievements.forEach((ach) => {
+      const row = document.createElement('div');
+      row.style.marginBottom = '3px';
+      
+      const nextTarget = ach.data.find((m) => state.achievements[ach.key + '_' + m] === undefined);
+      if (nextTarget === undefined) {
+        row.textContent = '✅ ' + ach.label + ' (MAX)';
+      } else {
+        const unlocked = ach.data.filter((m) => state.achievements[ach.key + '_' + m]).length;
+        row.textContent = '✅ '.repeat(unlocked) + '⬜ ' + ach.label + ' ' + ach.current + '/' + nextTarget;
+      }
+      
+      container.appendChild(row);
+    });
+
+    ACHIEVEMENT_MILESTONES.clicks.forEach((milestone) => {
+      const id = 'clicks_' + milestone;
+      if (!state.achievements[id] && state.clicks >= milestone) {
         state.achievements[id] = true;
         state.juice += 1;
         updateJuiceMultiplier();
-        message('Streak ×' + milestone + ' unlocked!');
+        message('Click Streak ×' + milestone + ' unlocked!');
       }
-      const row = document.createElement('div');
-      row.style.marginBottom = '4px';
-      row.textContent = (unlocked ? '✅' : '⬜') + ' Clicks: ' + milestone;
-      container.appendChild(row);
+    });
+
+    ACHIEVEMENT_MILESTONES.mps.forEach((milestone) => {
+      const id = 'mps_' + milestone;
+      if (!state.achievements[id] && Math.floor(baseProductionPerSecond() * eventMultiplier()) >= milestone) {
+        state.achievements[id] = true;
+        state.juice += 1;
+        updateJuiceMultiplier();
+        message('MPS ×' + milestone + ' unlocked!');
+      }
+    });
+
+    ACHIEVEMENT_MILESTONES.totalMoney.forEach((milestone) => {
+      const id = 'totalMoney_' + milestone;
+      if (!state.achievements[id] && state.totalEarned >= milestone) {
+        state.achievements[id] = true;
+        state.juice += 1;
+        updateJuiceMultiplier();
+        message('Earned ' + fmt(milestone) + ' unlocked!');
+      }
+    });
+
+    ACHIEVEMENT_MILESTONES.investors.forEach((milestone) => {
+      const id = 'investors_' + milestone;
+      if (!state.achievements[id] && state.totalInvestorsEver >= milestone) {
+        state.achievements[id] = true;
+        state.juice += 1;
+        updateJuiceMultiplier();
+        message('Investors ×' + milestone + ' unlocked!');
+      }
+    });
+
+    ACHIEVEMENT_MILESTONES.evolves.forEach((milestone) => {
+      const id = 'evolves_' + milestone;
+      if (!state.achievements[id] && state.totalEvolvesEver >= milestone) {
+        state.achievements[id] = true;
+        state.juice += 1;
+        updateJuiceMultiplier();
+        message('Evolutions ×' + milestone + ' unlocked!');
+      }
+    });
+
+    ACHIEVEMENT_MILESTONES.ascends.forEach((milestone) => {
+      const id = 'ascends_' + milestone;
+      if (!state.achievements[id] && state.totalPrestigesEver >= milestone) {
+        state.achievements[id] = true;
+        state.juice += 1;
+        updateJuiceMultiplier();
+        message('Prestige ×' + milestone + ' unlocked!');
+      }
     });
   }
 
@@ -590,7 +671,7 @@
     const defs = [
       ['click_25', 'Click 25×', () => state.clicks >= 25],
       ['money_1k', 'Earn $1k', () => state.totalEarned >= 1000],
-      ['investor_1', 'Get Investor', () => state.investors >= 1]
+      ['investor_1', 'Get Investor', () => state.totalInvestorsEver >= 1]
     ];
 
     container.innerHTML = '';
@@ -627,7 +708,7 @@
     const fill = document.getElementById('juiceFill');
     const label = document.getElementById('juiceLabel');
     const fruit = getCurrentFruit();
-    const maxJuice = STREAK_MILESTONES[STREAK_MILESTONES.length - 1];
+    const maxJuice = ACHIEVEMENT_MILESTONES.clicks[ACHIEVEMENT_MILESTONES.clicks.length - 1];
     const percentage = Math.min(100, (state.juice / maxJuice) * 100);
     fill.style.background = fruit.color;
     fill.style.height = percentage + '%';
@@ -642,7 +723,7 @@
     document.getElementById('clicker').textContent = fruit.emoji;
     document.getElementById('money').textContent = fmt(state.money);
     document.getElementById('mps').textContent = Math.floor(baseProductionPerSecond() * eventMultiplier()) + '/s';
-    document.getElementById('perClick').textContent = '+$' + Math.floor(state.perClick) + ' (×' + state.juiceMultiplier.toFixed(2) + ')';
+    document.getElementById('perClick').textContent = '+$' + Math.floor(state.perClick * state.juiceMultiplier) + ' (×' + state.juiceMultiplier.toFixed(2) + ')';
     document.getElementById('evolution').textContent = fruit.name;
     document.getElementById('prestige').textContent = state.prestige;
     document.getElementById('investors').textContent = state.investors;
@@ -727,9 +808,13 @@
       message('Need ' + fmt(cost));
       return;
     }
-    state.money -= cost;
+    const moneyBeforeReset = state.money - cost;
     state.investors += 1;
+    state.totalInvestorsEver += 1;
+    state.investorMultiplier *= 2;
     playTone(660, 0.12, 'triangle');
+    resetRun();
+    state.money = moneyBeforeReset * state.investorMultiplier;
     save();
     render();
   }
@@ -740,10 +825,13 @@
       return;
     }
     state.evolution += 1;
-    state.investors = 0;
+    state.totalEvolvesEver += 1;
+    state.evolveMultiplier *= 50;
+    playTone(880, 0.14, 'square');
     resetRun();
     state.evolution = Math.max(1, state.evolution);
-    playTone(880, 0.14, 'square');
+    state.money = 1 * state.evolveMultiplier;
+    state.investorMultiplier = 1;
     save();
     render();
   }
@@ -755,6 +843,7 @@
     }
     state.money -= state.prestigeCost;
     state.prestige += 1;
+    state.totalPrestigesEver += 1;
     state.prestigeCost = Math.min(MAX, Math.ceil(state.prestigeCost * 1.6));
     resetRun();
     state.prestige = Math.max(0, state.prestige);
@@ -782,6 +871,11 @@
       state.achievements = {};
       state.quests = {};
       state.juice = 0;
+      state.investorMultiplier = 1;
+      state.evolveMultiplier = 1;
+      state.totalInvestorsEver = 0;
+      state.totalEvolvesEver = 0;
+      state.totalPrestigesEver = 0;
       updateJuiceMultiplier();
       save();
       render();
@@ -856,6 +950,11 @@
       if (!state.offlineMultiplier) state.offlineMultiplier = 1;
       if (state.juice === undefined) state.juice = 0;
       if (state.juiceMultiplier === undefined) state.juiceMultiplier = 1;
+      if (state.investorMultiplier === undefined) state.investorMultiplier = 1;
+      if (state.evolveMultiplier === undefined) state.evolveMultiplier = 1;
+      if (state.totalInvestorsEver === undefined) state.totalInvestorsEver = 0;
+      if (state.totalEvolvesEver === undefined) state.totalEvolvesEver = 0;
+      if (state.totalPrestigesEver === undefined) state.totalPrestigesEver = 0;
       updateJuiceMultiplier();
       registerEvents();
       applyOfflineEarnings();
@@ -871,6 +970,11 @@
     if (!state.offlineMultiplier) state.offlineMultiplier = 1;
     if (state.juice === undefined) state.juice = 0;
     if (state.juiceMultiplier === undefined) state.juiceMultiplier = 1;
+    if (state.investorMultiplier === undefined) state.investorMultiplier = 1;
+    if (state.evolveMultiplier === undefined) state.evolveMultiplier = 1;
+    if (state.totalInvestorsEver === undefined) state.totalInvestorsEver = 0;
+    if (state.totalEvolvesEver === undefined) state.totalEvolvesEver = 0;
+    if (state.totalPrestigesEver === undefined) state.totalPrestigesEver = 0;
     updateJuiceMultiplier();
     registerEvents();
     applyOfflineEarnings();
